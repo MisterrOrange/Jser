@@ -1,0 +1,9 @@
+{
+    "fruits": {
+	"1":"apple",
+	"2":"flower",
+	"3":"dirt"
+},
+    "size": "Large",
+    "color": "Red"
+}
