@@ -23,6 +23,10 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(Jser
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+        Objects/components.cpp Objects/components.h
+        Objects/DataTypes/jsonString.h Objects/DataTypes/jsonString.cpp
+        Objects/DataStructures/dictionary.h Objects/DataStructures/dictionary.cpp
+        jsonprocessor.h jsonprocessor.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET Jser APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
