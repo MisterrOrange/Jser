@@ -4,21 +4,21 @@
 #include "..\components.h"
 #include <map>
 #include <string>
+#include <memory>
 
 class Dictionary : public Components
 {
 public:
     Dictionary();
-    Dictionary(Components *parent);
-    ~Dictionary();
-    void AddValue(std::string key, Components *value);
-    Components *GetParent();
+    Dictionary(std::shared_ptr<Components> parent);
+    void AddValue(std::string key, std::shared_ptr<Components> value);
+    std::shared_ptr<Components> GetParent();
 
-    std::map<std::string, Components*> m_pairs;
+    std::map<std::string, std::shared_ptr<Components>> m_pairs;
 
 
 private:
-    Components *m_parent;
+    std::shared_ptr<Components> m_parent;
 };
 
 #endif // DICTIONARY_H

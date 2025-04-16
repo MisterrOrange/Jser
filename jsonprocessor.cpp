@@ -19,8 +19,8 @@ JsonProcessor::JsonProcessor(std::string path) {
     m_rootElement = ParseJson(0);
 }
 
-Dictionary* JsonProcessor::ParseJson(int startIndex) {
-    Dictionary *currentComponent = nullptr;
+std::shared_ptr<Components> JsonProcessor::ParseJson(int startIndex) {
+    std::shared_ptr<Dictionary> currentComponent = nullptr;
 
     std::stack<Status> state;
     std::string key;
@@ -39,13 +39,13 @@ Dictionary* JsonProcessor::ParseJson(int startIndex) {
         switch (character) {
         case '{':
             // Generate child
-            if (state.empty()) { currentComponent = new Dictionary(); }
-            else               { currentComponent = new Dictionary(currentComponent); }
+            if (state.empty()) { currentComponent = std::shared_ptr<Dictionary>(new Dictionary()); }
+            else               { currentComponent = std::shared_ptr<Dictionary>(new Dictionary(currentComponent)); }
 
             // Point parent to child
             if (!state.empty()) {
                 if (state.top() == kInDictionary) {
-                    Dictionary *parent = (Dictionary*)currentComponent->GetParent();
+                    std::shared_ptr<Dictionary> parent = std::static_pointer_cast<Dictionary>(currentComponent->GetParent());
                     parent->AddValue(key, currentComponent);
                 }
             }
@@ -57,7 +57,7 @@ Dictionary* JsonProcessor::ParseJson(int startIndex) {
             state.pop();
             if (!state.empty()) {
                 if (currentComponent == nullptr) { throw std::invalid_argument("Component pointer is null"); }
-                currentComponent = (Dictionary*)currentComponent->GetParent();
+                currentComponent = std::static_pointer_cast<Dictionary>(currentComponent->GetParent());
                 if (state.top() == kInDictionary) { valueIncoming = false; }
             }
             break;
@@ -70,7 +70,7 @@ Dictionary* JsonProcessor::ParseJson(int startIndex) {
 
                 // If key and value have been captured
                 if (!valueIncoming) {
-                    currentComponent->AddValue(key, new JsonString(currentString));
+                    currentComponent->AddValue(key, std::shared_ptr<JsonString>(new JsonString(currentString)));
                 }
                 key = currentString;
                 currentString = "";

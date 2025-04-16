@@ -19,9 +19,9 @@ public:
     };
 
 private:
-    Dictionary *ParseJson(int startindex);
+    std::shared_ptr<Components> ParseJson(int startindex);
     mio::mmap_source mmap;
-    Components *m_rootElement;
+    std::shared_ptr<Components> m_rootElement;
 };
 
 #endif // JSONPROCESSOR_H
