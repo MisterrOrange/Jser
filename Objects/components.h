@@ -10,6 +10,9 @@ protected:
         kDictionary,
         kArray
     };
+public:
+    enum Types Type;
+
 };
 
 #endif

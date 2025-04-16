@@ -12,9 +12,14 @@ class JsonProcessor
 {
 public:
     JsonProcessor(std::string path);
+    enum Status {
+        kInDictionary,
+        kInArray,
+        kInString
+    };
 
 private:
-    Dictionary* HandleDictionary(int startindex);
+    Dictionary *ParseJson(int startindex);
     mio::mmap_source mmap;
     Components *m_rootElement;
 };

@@ -9,11 +9,16 @@ class Dictionary : public Components
 {
 public:
     Dictionary();
+    Dictionary(Components *parent);
     ~Dictionary();
     void AddValue(std::string key, Components *value);
+    Components *GetParent();
+
+    std::map<std::string, Components*> m_pairs;
+
 
 private:
-    std::map<std::string, Components*> m_pairs;
+    Components *m_parent;
 };
 
 #endif // DICTIONARY_H

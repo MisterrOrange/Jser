@@ -2,6 +2,7 @@
 
 JsonString::JsonString(std::string value) {
     m_value = new std::string(value);
+    Type = kString;
 }
 
 JsonString::~JsonString() {
