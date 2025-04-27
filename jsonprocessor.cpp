@@ -1,6 +1,4 @@
 #include "jsonprocessor.h"
-#include "Objects/DataStructures/dictionary.h"
-#include "Objects/DataTypes/jsonString.h"
 
 #include <stack>
 
@@ -20,7 +18,7 @@ JsonProcessor::JsonProcessor(std::string path) {
 }
 
 std::shared_ptr<Components> JsonProcessor::ParseJson(int startIndex) {
-    std::shared_ptr<Dictionary> currentComponent = nullptr;
+    std::shared_ptr<Components> currentComponent = nullptr;
 
     std::stack<Status> state;
     std::string key;
@@ -39,14 +37,14 @@ std::shared_ptr<Components> JsonProcessor::ParseJson(int startIndex) {
         switch (character) {
         case '{':
             // Generate child
-            if (state.empty()) { currentComponent = std::shared_ptr<Dictionary>(new Dictionary()); }
-            else               { currentComponent = std::shared_ptr<Dictionary>(new Dictionary(currentComponent)); }
+            if (state.empty()) { currentComponent = std::shared_ptr<Components>(new Components(Components::kDictionary)); }
+            else               { currentComponent = std::shared_ptr<Components>(new Components(Components::kDictionary, currentComponent.get())); }
 
             // Point parent to child
             if (!state.empty()) {
                 if (state.top() == kInDictionary) {
-                    std::shared_ptr<Dictionary> parent = std::static_pointer_cast<Dictionary>(currentComponent->GetParent());
-                    parent->AddValue(key, currentComponent);
+                    Components *parent = currentComponent->parent();
+                    parent->addChild(currentComponent);
                 }
             }
             state.push(kInDictionary);
@@ -57,7 +55,8 @@ std::shared_ptr<Components> JsonProcessor::ParseJson(int startIndex) {
             state.pop();
             if (!state.empty()) {
                 if (currentComponent == nullptr) { throw std::invalid_argument("Component pointer is null"); }
-                currentComponent = std::static_pointer_cast<Dictionary>(currentComponent->GetParent());
+                // Set current to parent
+                currentComponent = std::static_pointer_cast<Components>(std::shared_ptr<Components>(currentComponent->parent()));
                 if (state.top() == kInDictionary) { valueIncoming = false; }
             }
             break;
@@ -70,7 +69,9 @@ std::shared_ptr<Components> JsonProcessor::ParseJson(int startIndex) {
 
                 // If key and value have been captured
                 if (!valueIncoming) {
-                    currentComponent->AddValue(key, std::shared_ptr<JsonString>(new JsonString(currentString)));
+                    // Create child to save ky-value-pair
+                    std::shared_ptr<Components> child = std::shared_ptr<Components>(new Components(Components::kString, currentComponent.get(), key));
+                    child->setValue(currentString);
                 }
                 key = currentString;
                 currentString = "";
