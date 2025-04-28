@@ -4,7 +4,7 @@
 #include "Objects/components.h"
 #include <string>
 #include "lib/mio.hpp"
-
+#include "Objects/jsonmodel.h"
 
 
 class JsonProcessor
@@ -18,9 +18,9 @@ public:
     };
 
 private:
-    std::shared_ptr<Components> ParseJson(int startindex);
+    std::shared_ptr<Components> ParseJson(int startindex = 0);
     mio::mmap_source mmap;
-    std::shared_ptr<Components> m_rootElement;
+    std::unique_ptr<JsonModel> m_model;
 };
 
 #endif // JSONPROCESSOR_H

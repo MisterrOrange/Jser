@@ -12,7 +12,7 @@ class JsonModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    JsonModel(std::unique_ptr<Components> &&rootElement);
+    JsonModel(std::shared_ptr<Components> rootElement);
 
     QModelIndex index(int row, int column, const QModelIndex &parent = {}) const override;
     QVariant data(const QModelIndex &index, int role) const override;
@@ -21,7 +21,7 @@ public:
     int columnCount(const QModelIndex &parent = {}) const override;
 
 private:
-    std::unique_ptr<Components> m_rootElement;
+    std::shared_ptr<Components> m_rootElement;
 };
 
 #endif // JSONMODEL_H

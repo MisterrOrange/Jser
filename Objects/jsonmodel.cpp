@@ -1,8 +1,8 @@
 #include "jsonmodel.h"
 #include "components.h"
 
-JsonModel::JsonModel(std::unique_ptr<Components> &&rootElement) {
-    m_rootElement = std::move(rootElement);
+JsonModel::JsonModel(std::shared_ptr<Components> rootElement) {
+    m_rootElement = rootElement;
 }
 
 QModelIndex JsonModel::index(int row, int column, const QModelIndex &parent) const {

@@ -13,8 +13,7 @@ JsonProcessor::JsonProcessor(std::string path) {
     std::error_code error;
     mmap = mio::make_mmap_source(path, error);
 
-
-    m_rootElement = ParseJson(0);
+    ParseJson();
 }
 
 std::shared_ptr<Components> JsonProcessor::ParseJson(int startIndex) {
@@ -39,7 +38,7 @@ std::shared_ptr<Components> JsonProcessor::ParseJson(int startIndex) {
             // Generate child
             if (state.empty()) {
                 currentComponent = std::shared_ptr<Components>(new Components(Components::kDictionary));
-                m_rootElement = currentComponent;
+                m_model = std::unique_ptr<JsonModel>(new JsonModel(currentComponent));
             }
             else {
                 currentComponent = std::shared_ptr<Components>(new Components(Components::kDictionary, currentComponent, key));
