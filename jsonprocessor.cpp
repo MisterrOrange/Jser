@@ -37,8 +37,13 @@ std::shared_ptr<Components> JsonProcessor::ParseJson(int startIndex) {
         switch (character) {
         case '{':
             // Generate child
-            if (state.empty()) { currentComponent = std::shared_ptr<Components>(new Components(Components::kDictionary)); }
-            else               { currentComponent = std::shared_ptr<Components>(new Components(Components::kDictionary, currentComponent.get())); }
+            if (state.empty()) {
+                currentComponent = std::shared_ptr<Components>(new Components(Components::kDictionary));
+                m_rootElement = currentComponent;
+            }
+            else {
+                currentComponent = std::shared_ptr<Components>(new Components(Components::kDictionary, currentComponent, key));
+            }
 
             // Point parent to child
             if (!state.empty()) {
@@ -70,7 +75,7 @@ std::shared_ptr<Components> JsonProcessor::ParseJson(int startIndex) {
                 // If key and value have been captured
                 if (!valueIncoming) {
                     // Create child to save ky-value-pair
-                    std::shared_ptr<Components> child = std::shared_ptr<Components>(new Components(Components::kString, currentComponent.get(), key));
+                    std::shared_ptr<Components> child = std::shared_ptr<Components>(new Components(Components::kString, currentComponent, key));
                     child->setValue(currentString);
                 }
                 key = currentString;

@@ -15,7 +15,8 @@ public:
         kArray
     };
 
-    Components(Types type, Components *parent = nullptr, std::string name = "root");
+    Components(Types type);
+    Components(Types type, std::shared_ptr<Components> parent, std::string name);
     void setValue(std::string value);
 
     void addChild(std::shared_ptr<Components> child);
@@ -25,11 +26,11 @@ public:
     int columnCount() const;
 
 private:
-    Components *m_parent;
+    std::weak_ptr<Components> m_parent;
     enum Types m_type;
 
     std::string m_name; // "key" in dictionary terms
-    std::string m_value;
+    std::unique_ptr<std::string> m_value;
     bool m_isValuePresent;
 
     std::vector<std::shared_ptr<Components>> m_children;
