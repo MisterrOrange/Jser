@@ -48,8 +48,7 @@ std::shared_ptr<Components> JsonProcessor::ParseJson(int startIndex) {
             // Point parent to child
             if (!state.empty()) {
                 if (state.top() == kInDictionary) {
-                    Components *parent = currentComponent->parent();
-                    parent->addChild(currentComponent);
+                    currentComponent->parent()->addChild(currentComponent);
                 }
             }
             state.push(kInDictionary);
@@ -74,9 +73,10 @@ std::shared_ptr<Components> JsonProcessor::ParseJson(int startIndex) {
 
                 // If key and value have been captured
                 if (!valueIncoming) {
-                    // Create child to save ky-value-pair
+                    // Create child to save key-value-pair
                     std::shared_ptr<Components> child = std::shared_ptr<Components>(new Components(Components::kString, currentComponent, key));
                     child->setValue(currentString);
+                    child->parent()->addChild(child);
                 }
                 key = currentString;
                 currentString = "";
