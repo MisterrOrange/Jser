@@ -1,5 +1,6 @@
 #include "components.h"
 #include <stdexcept>
+#include <QString>
 
 Components::Components(Types type) {
     m_type = type;
@@ -10,17 +11,16 @@ Components::Components(Types type) {
 Components::Components(Types type, std::shared_ptr<Components> parent, std::string name) {
     m_type = type;
     m_parent = parent;
-    m_name = name;
+    m_name = QVariant(QString::fromStdString(name));;
 
     m_isValuePresent = false;
-    m_value = nullptr;
 }
 
 void Components::setValue(std::string value) {
     if (m_children.size() != 0)
         throw std::invalid_argument("Value can't be assigned if children are present");
 
-    m_value = std::unique_ptr<std::string>(new std::string(value));
+    m_value = QVariant(QString::fromStdString(value));
     m_isValuePresent = true;
 }
 
@@ -53,4 +53,12 @@ int Components::columnCount() const {
     if (m_isValuePresent)
         return 2;
     return 1;
+}
+
+QVariant Components::data(int column) const {
+    if (column == 1)
+        return m_name;
+    if (column == 2 && m_isValuePresent)
+        return m_value;
+    return QVariant();
 }

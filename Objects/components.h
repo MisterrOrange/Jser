@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <QVariant>
 
 class Components
 {
@@ -24,13 +25,14 @@ public:
     Components *parent() const;
     int childCount() const;
     int columnCount() const;
+    QVariant data(int column) const;
 
 private:
     std::weak_ptr<Components> m_parent;
     enum Types m_type;
 
-    std::string m_name; // "key" in dictionary terms
-    std::unique_ptr<std::string> m_value;
+    QVariant m_name; // "key" in dictionary terms
+    QVariant m_value;
     bool m_isValuePresent;
 
     std::vector<std::shared_ptr<Components>> m_children;
