@@ -4,7 +4,6 @@
 #include <QVariant>
 #include <QModelIndex>
 #include <QAbstractItemModel>
-#include "components.h"
 
 class Components;
 class JsonModel : public QAbstractItemModel
@@ -12,6 +11,8 @@ class JsonModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
+    Q_DISABLE_COPY_MOVE(JsonModel);
+
     JsonModel(std::shared_ptr<Components> rootElement);
 
     QModelIndex index(int row, int column, const QModelIndex &parent = {}) const override;

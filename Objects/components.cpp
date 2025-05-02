@@ -39,10 +39,10 @@ Components* Components::child(int row) const {
 }
 
 Components* Components::parent() const {
-    if (m_parent.expired()) {
-        throw new std::invalid_argument("Parent pointer doesn't exist");
-    }
-    return m_parent.lock().get();
+    //if (m_parent.expired()) {
+    //    throw new std::invalid_argument("Parent pointer doesn't exist");
+    //}
+    return m_parent.get();
 }
 
 int Components::childCount() const {
@@ -50,15 +50,27 @@ int Components::childCount() const {
 }
 
 int Components::columnCount() const {
-    if (m_isValuePresent)
-        return 2;
-    return 1;
+    // Apparently this goes for all children
+    return 2;
 }
 
 QVariant Components::data(int column) const {
-    if (column == 1)
+    if (column == 0)
         return m_name;
-    if (column == 2 && m_isValuePresent)
+    if (column == 1 && m_isValuePresent)
         return m_value;
     return QVariant();
+}
+
+int Components::row() const {
+    //if (m_parent.expired())
+    //    return 0;
+    Components *parent = this->parent();
+    for (int i = 0; i < parent->childCount(); ++i) {
+        Components *child = parent->m_children[i].get();
+        if (child == this)
+            return i;
+    }
+    // Shouldn't happen
+    return 0;
 }

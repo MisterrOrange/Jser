@@ -88,3 +88,7 @@ std::shared_ptr<Components> JsonProcessor::ParseJson(int startIndex) {
     }
     return currentComponent;
 }
+
+JsonModel* JsonProcessor::getModel() {
+    return m_model.get();
+}

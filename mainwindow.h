@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "jsonprocessor.h"
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -16,9 +18,14 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    void Additem(std::string item);
+
 
 private:
     Ui::MainWindow *ui;
+    JsonProcessor *processor;
+
+public slots:
+    void Additem();
+
 };
 #endif // MAINWINDOW_H

@@ -25,10 +25,11 @@ public:
     Components *parent() const;
     int childCount() const;
     int columnCount() const;
+    int row() const;
     QVariant data(int column) const;
 
 private:
-    std::weak_ptr<Components> m_parent;
+    std::shared_ptr<Components> m_parent;
     enum Types m_type;
 
     QVariant m_name; // "key" in dictionary terms

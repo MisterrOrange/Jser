@@ -16,6 +16,7 @@ public:
         kInArray,
         kInString
     };
+    JsonModel* getModel();
 
 private:
     std::shared_ptr<Components> ParseJson(int startindex = 0);
