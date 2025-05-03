@@ -10,11 +10,16 @@ Components::Components(Types type) {
 
 Components::Components(Types type, std::shared_ptr<Components> parent, std::string name) {
     m_type = type;
-    m_parent = parent;
-    m_name = QVariant(QString::fromStdString(name));;
+    m_parent = parent; // Pointing parent to child inside here doesn't work (for some reason), so it has to be done outside
 
+    m_name = QVariant(QString::fromStdString(name));;
     m_isValuePresent = false;
 }
+
+
+Components::Components(Types type, std::shared_ptr<Components> parent, int index)
+    : Components(type, parent, "[" + std::to_string(index) + "]") { }
+
 
 void Components::setValue(std::string value) {
     if (m_children.size() != 0)
@@ -31,18 +36,19 @@ void Components::addChild(std::shared_ptr<Components> child) {
     return;
 }
 
-Components* Components::child(int row) const {
+
+std::shared_ptr<Components> Components::child(int row) const {
     if (row >= m_children.size())
         return nullptr;
 
-    return m_children[row].get();
+    return m_children[row];
 }
 
-Components* Components::parent() const {
-    //if (m_parent.expired()) {
-    //    throw new std::invalid_argument("Parent pointer doesn't exist");
-    //}
-    return m_parent.get();
+std::shared_ptr<Components> Components::parent() const {
+    if (m_parent.expired()) {
+        throw new std::invalid_argument("Parent pointer doesn't exist");
+    }
+    return m_parent.lock();
 }
 
 int Components::childCount() const {
@@ -63,9 +69,9 @@ QVariant Components::data(int column) const {
 }
 
 int Components::row() const {
-    //if (m_parent.expired())
-    //    return 0;
-    Components *parent = this->parent();
+    if (m_parent.expired())
+        return 0;
+    Components *parent = this->parent().get();
     for (int i = 0; i < parent->childCount(); ++i) {
         Components *child = parent->m_children[i].get();
         if (child == this)

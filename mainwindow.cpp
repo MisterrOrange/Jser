@@ -14,9 +14,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     clock_t start = clock();
     processor = new JsonProcessor("C:/Users/admin/source/qt-repos/Jser/Inputs/2.json");
-    // in milliseconds
-    float duration = ((clock() - start) / CLOCKS_PER_SEC) * 1000;
-    ui->parseDurationLabel->setText(QString::fromStdString(std::to_string(duration) + " ms"));
+    // in Milliseconds
+    float duration = ((clock() - start) * 1000 / CLOCKS_PER_SEC);
+    ui->parseDurationLabel->setText(QString::fromStdString("Parsed in " + std::to_string(duration) + " ms"));
     ui->treeView->setModel(processor->getModel());
 }
 

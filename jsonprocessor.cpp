@@ -22,6 +22,7 @@ std::shared_ptr<Components> JsonProcessor::ParseJson(int startIndex) {
     std::stack<Status> state;
     std::string key;
     std::string currentString;
+    int arrayIndex = 0;
     // Stores whether next item is value or not
     bool valueIncoming = false;
     for (int it = startIndex; it < mmap.size(); ++it) {
@@ -37,18 +38,12 @@ std::shared_ptr<Components> JsonProcessor::ParseJson(int startIndex) {
         case '{':
             // Generate child
             if (state.empty()) {
-                currentComponent = std::shared_ptr<Components>(new Components(Components::kDictionary));
+                currentComponent = std::make_shared<Components>(Components::kDictionary);
                 m_model = std::unique_ptr<JsonModel>(new JsonModel(currentComponent));
             }
             else {
-                currentComponent = std::shared_ptr<Components>(new Components(Components::kDictionary, currentComponent, key));
-            }
-
-            // Point parent to child
-            if (!state.empty()) {
-                if (state.top() == kInDictionary) {
-                    currentComponent->parent()->addChild(currentComponent);
-                }
+                currentComponent = std::make_shared<Components>(Components::kDictionary, currentComponent, key);
+                currentComponent->parent()->addChild(currentComponent);
             }
             state.push(kInDictionary);
             valueIncoming = false;
@@ -56,11 +51,48 @@ std::shared_ptr<Components> JsonProcessor::ParseJson(int startIndex) {
 
         case '}':
             state.pop();
-            if (!state.empty()) {
-                if (currentComponent == nullptr) { throw std::invalid_argument("Component pointer is null"); }
-                // Set current to parent
-                currentComponent = std::static_pointer_cast<Components>(std::shared_ptr<Components>(currentComponent->parent()));
-                if (state.top() == kInDictionary) { valueIncoming = false; }
+            if (state.empty()) { continue; }
+
+            if (currentComponent == nullptr) { throw std::invalid_argument("Component pointer is null"); }
+            // Set currentComponent to it's parent
+            currentComponent = currentComponent->parent();
+            if (state.top() == kInDictionary)
+                { valueIncoming = false; }
+            else if (state.top() == kInArray)
+                { arrayIndex = currentComponent->childCount(); }
+            break;
+
+        case '[':
+            if (state.empty()) {
+                currentComponent = std::make_shared<Components>(Components::kArray);
+                m_model = std::make_unique<JsonModel>(currentComponent);
+            }
+            else {
+                // If there's a dictionary before going into array now
+                if (state.top() == Status::kInDictionary) {
+                    currentComponent = std::make_shared<Components>(Components::kArray, currentComponent, key);
+                }
+                else if (state.top() == Status::kInArray){
+                    currentComponent = std::make_shared<Components>(Components::kArray, currentComponent, arrayIndex);
+                }
+                else { throw new std::invalid_argument("State is invalid"); }
+                currentComponent->parent()->addChild(currentComponent);
+            }
+            arrayIndex = 0;
+            state.push(kInArray);
+            break;
+
+        case ']':
+            if (state.top() != kInArray) { throw std::invalid_argument("Expected array closure"); }
+            state.pop();
+            if (state.empty()) { continue; }
+
+            currentComponent = currentComponent->parent();
+            if (state.top() == kInDictionary) {
+                valueIncoming = false;
+            }
+            else if (state.top() == kInArray) {
+                arrayIndex = currentComponent->childCount();
             }
             break;
 
@@ -70,12 +102,20 @@ std::shared_ptr<Components> JsonProcessor::ParseJson(int startIndex) {
                 state.pop();
                 valueIncoming = !valueIncoming;
 
-                // If key and value have been captured
-                if (!valueIncoming) {
-                    // Create child to save key-value-pair
-                    std::shared_ptr<Components> child = std::shared_ptr<Components>(new Components(Components::kString, currentComponent, key));
+                if (state.top() == kInDictionary) {
+                    // If key and value have been captured
+                    if (!valueIncoming) {
+                        // Create child to save key-value-pair
+                        std::shared_ptr<Components> child = std::make_shared<Components>(Components::kString, currentComponent, key);
+                        child->setValue(currentString);
+                        currentComponent->addChild(child);
+                    }
+                }
+                else if (state.top() == kInArray) {
+                    std::shared_ptr<Components> child = std::make_shared<Components>(Components::kString, currentComponent, arrayIndex);
+                    arrayIndex++;
                     child->setValue(currentString);
-                    child->parent()->addChild(child);
+                    currentComponent->addChild(child);
                 }
                 key = currentString;
                 currentString = "";

@@ -11,25 +11,27 @@ class Components
 public:
     enum Types {
         kString,
-        knumber,
+        kNumber,
+        kBoolean,
         kDictionary,
         kArray
     };
 
     Components(Types type);
     Components(Types type, std::shared_ptr<Components> parent, std::string name);
+    Components(Types type, std::shared_ptr<Components> parent, int index);
     void setValue(std::string value);
 
-    void addChild(std::shared_ptr<Components> child);
-    Components *child(int row) const;
-    Components *parent() const;
+    void addChild(std::shared_ptr<Components> child); // Adds a child to `this`
+    std::shared_ptr<Components> child(int row) const;
+    std::shared_ptr<Components> parent() const;
     int childCount() const;
     int columnCount() const;
     int row() const;
     QVariant data(int column) const;
 
 private:
-    std::shared_ptr<Components> m_parent;
+    std::weak_ptr<Components> m_parent;
     enum Types m_type;
 
     QVariant m_name; // "key" in dictionary terms

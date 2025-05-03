@@ -11,7 +11,7 @@ QModelIndex JsonModel::index(int row, int column, const QModelIndex &parent) con
 
     Components *parentItem = parent.isValid() ? static_cast<Components*>(parent.internalPointer()) : m_rootElement.get();
 
-    Components *childItem = parentItem->child(row);
+    Components *childItem = parentItem->child(row).get();
     if (childItem == nullptr)
         return {};
     return createIndex(row, column, childItem);
@@ -45,7 +45,7 @@ QModelIndex JsonModel::parent(const QModelIndex &index) const {
         return {};
 
     Components *childItem = static_cast<Components*>(index.internalPointer());
-    Components *parentItem = childItem->parent();
+    Components *parentItem = childItem->parent().get();
 
     return parentItem != m_rootElement.get() ? createIndex(parentItem->row(), 0, parentItem) : QModelIndex{};
 }
