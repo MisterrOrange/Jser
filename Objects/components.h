@@ -9,18 +9,24 @@
 class Components
 {
 public:
-    enum Types {
+    enum ValueTypes {
         kString,
         kNumber,
+        kFloat,
         kBoolean,
+        kNull
+    };
+    enum StorageTypes {
         kDictionary,
-        kArray
+        kArray,
+        kNone
     };
 
-    Components(Types type);
-    Components(Types type, std::shared_ptr<Components> parent, std::string name);
-    Components(Types type, std::shared_ptr<Components> parent, int index);
-    void setValue(std::string value);
+    Components(StorageTypes type);
+    explicit Components(StorageTypes type, std::shared_ptr<Components> parent, std::string name, ValueTypes nameType = kString);
+    explicit Components(StorageTypes type, std::shared_ptr<Components> parent, int index);
+    explicit Components(StorageTypes type, std::shared_ptr<Components> parent, bool value);
+    void setValue(ValueTypes valueType, std::string value);
 
     void addChild(std::shared_ptr<Components> child); // Adds a child to `this`
     std::shared_ptr<Components> child(int row) const;
@@ -32,7 +38,13 @@ public:
 
 private:
     std::weak_ptr<Components> m_parent;
-    enum Types m_type;
+
+    // General type of object
+    enum StorageTypes m_generalType;
+
+    // Types of name and value
+    enum ValueTypes m_nameType;
+    enum ValueTypes m_valueType;
 
     QVariant m_name; // "key" in dictionary terms
     QVariant m_value;

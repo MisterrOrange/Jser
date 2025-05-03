@@ -14,12 +14,15 @@ public:
     enum Status {
         kInDictionary,
         kInArray,
-        kInString
+        kInString,
+        kInNumber,
+        kInFloat
     };
     JsonModel* getModel();
 
 private:
     std::shared_ptr<Components> ParseJson(int startindex = 0);
+    char getCharacter(int index);
     mio::mmap_source mmap;
     std::unique_ptr<JsonModel> m_model;
 };

@@ -2,12 +2,6 @@
 
 #include <stack>
 
-// TODO:
-// - Add way to print Dictionary
-// - Remove recursion from this (DONE)
-// - Use smart pointers
-
-
 
 JsonProcessor::JsonProcessor(std::string path) {
     std::error_code error;
@@ -26,15 +20,118 @@ std::shared_ptr<Components> JsonProcessor::ParseJson(int startIndex) {
     // Stores whether next item is value or not
     bool valueIncoming = false;
     for (int it = startIndex; it < mmap.size(); ++it) {
-        char character = mmap[it];
+        char character = getCharacter(it);
 
         // Capture characters for string
-        if (!state.empty() && state.top() == kInString && character != '"') {
+        if (!state.empty()) {
+            if (state.top() == kInString && character != '"') {
+                currentString += character;
+                continue;
+            }
+            else if (state.top() == kInNumber || state.top() == kInFloat) {
+                // Number has ended
+                if (std::isdigit(character)) {
+                    // Capture number
+                    currentString += character;
+                    continue;
+                }
+                // If it's a float
+                if (character == '.') {
+                    // Replace number with float
+                    state.pop();
+                    state.push(kInFloat);
+                    currentString += '.';
+                    continue;
+                }
+                else {
+                    Components::ValueTypes valueType = state.top() == kInNumber ? Components::ValueTypes::kNumber : Components::ValueTypes::kFloat;
+                    state.pop();
+                    if (state.top() == kInDictionary) {
+                        if (valueIncoming) {
+                            std::shared_ptr<Components> child = std::make_shared<Components>(Components::kNone, currentComponent, key, valueType);
+                            child->setValue(valueType, currentString);
+                            currentComponent->addChild(child);
+                        }
+                        else {
+                            key = currentString;
+                        }
+
+                        valueIncoming = !valueIncoming;
+                    }
+                    else if (state.top() == kInArray) {
+                        std::shared_ptr<Components> child = std::make_shared<Components>(Components::kNone, currentComponent, arrayIndex);
+                        arrayIndex++;
+                        child->setValue(valueType, currentString);
+                        currentComponent->addChild(child);
+                    }
+                    currentString = "";
+                }
+                continue;
+            }
+        }
+
+        if (std::isdigit(character)) {
+            state.push(kInNumber);
             currentString += character;
             continue;
         }
 
         switch (character) {
+        // Handles boolean false
+        case 'f':
+            if (getCharacter(it+1) == 'a' && getCharacter(it+2) == 'l' && getCharacter(it+3) == 's' && getCharacter(it+4) == 'e') {
+                it += 4;
+                if (valueIncoming || state.top() == kInArray) {
+                    std::shared_ptr<Components> child;
+                    if (state.top() == kInDictionary) {
+                         child = std::make_shared<Components>(Components::kNone, currentComponent, key);
+                        valueIncoming = false;
+                    }
+                    else if (state.top() == kInArray) {
+                        child = std::make_shared<Components>(Components::kNone, currentComponent, arrayIndex);
+                        arrayIndex++;
+                    }
+                    else {
+                        throw std::invalid_argument("Invalid state");
+                    }
+                    child->setValue(Components::kBoolean, "false");
+                    currentComponent->addChild(child);
+                }
+                else {
+                    key = "false";
+                    valueIncoming = true;
+                }
+            }
+            break;
+
+        // Handles boolean true
+        case 't':
+            if (getCharacter(it+1) == 'r' && getCharacter(it+2) == 'u' && getCharacter(it+3) == 'e') {
+                it += 3;
+                if (valueIncoming || state.top() == kInArray) {
+                    std::shared_ptr<Components> child;
+                    if (state.top() == kInDictionary) {
+                        child = std::make_shared<Components>(Components::kNone, currentComponent, key);
+                        valueIncoming = false;
+                    }
+                    else if (state.top() == kInArray) {
+                        child = std::make_shared<Components>(Components::kNone, currentComponent, arrayIndex);
+                        arrayIndex++;
+                    }
+                    else {
+                        throw std::invalid_argument("Invalid state");
+                    }
+                    child->setValue(Components::kBoolean, "true");
+                    currentComponent->addChild(child);
+                }
+                else {
+                    key = "true";
+                    valueIncoming = true;
+                }
+            }
+            break;
+
+
         case '{':
             // Generate child
             if (state.empty()) {
@@ -42,7 +139,10 @@ std::shared_ptr<Components> JsonProcessor::ParseJson(int startIndex) {
                 m_model = std::unique_ptr<JsonModel>(new JsonModel(currentComponent));
             }
             else {
-                currentComponent = std::make_shared<Components>(Components::kDictionary, currentComponent, key);
+                if (state.top() == kInDictionary)
+                    currentComponent = std::make_shared<Components>(Components::kDictionary, currentComponent, key);
+                else
+                    currentComponent = std::make_shared<Components>(Components::kDictionary, currentComponent, arrayIndex);
                 currentComponent->parent()->addChild(currentComponent);
             }
             state.push(kInDictionary);
@@ -83,7 +183,9 @@ std::shared_ptr<Components> JsonProcessor::ParseJson(int startIndex) {
             break;
 
         case ']':
-            if (state.top() != kInArray) { throw std::invalid_argument("Expected array closure"); }
+            if (state.top() != kInArray) {
+                throw std::invalid_argument("Expected array closure");
+            }
             state.pop();
             if (state.empty()) { continue; }
 
@@ -106,15 +208,15 @@ std::shared_ptr<Components> JsonProcessor::ParseJson(int startIndex) {
                     // If key and value have been captured
                     if (!valueIncoming) {
                         // Create child to save key-value-pair
-                        std::shared_ptr<Components> child = std::make_shared<Components>(Components::kString, currentComponent, key);
-                        child->setValue(currentString);
+                        std::shared_ptr<Components> child = std::make_shared<Components>(Components::kNone, currentComponent, key);
+                        child->setValue(Components::kString, currentString);
                         currentComponent->addChild(child);
                     }
                 }
                 else if (state.top() == kInArray) {
-                    std::shared_ptr<Components> child = std::make_shared<Components>(Components::kString, currentComponent, arrayIndex);
+                    std::shared_ptr<Components> child = std::make_shared<Components>(Components::kNone, currentComponent, arrayIndex);
                     arrayIndex++;
-                    child->setValue(currentString);
+                    child->setValue(Components::kString, currentString);
                     currentComponent->addChild(child);
                 }
                 key = currentString;
@@ -131,4 +233,10 @@ std::shared_ptr<Components> JsonProcessor::ParseJson(int startIndex) {
 
 JsonModel* JsonProcessor::getModel() {
     return m_model.get();
+}
+
+char JsonProcessor::getCharacter(int index) {
+    if (index > mmap.size())
+        throw new std::invalid_argument("File index out of range");
+    return mmap[index];
 }

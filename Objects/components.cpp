@@ -2,14 +2,15 @@
 #include <stdexcept>
 #include <QString>
 
-Components::Components(Types type) {
-    m_type = type;
+Components::Components(StorageTypes type) {
+    m_generalType = type;
     m_name = "root";
     m_isValuePresent = false;
 }
 
-Components::Components(Types type, std::shared_ptr<Components> parent, std::string name) {
-    m_type = type;
+Components::Components(StorageTypes type, std::shared_ptr<Components> parent, std::string name, ValueTypes nameType) {
+    m_generalType = type;
+    m_nameType = nameType;
     m_parent = parent; // Pointing parent to child inside here doesn't work (for some reason), so it has to be done outside
 
     m_name = QVariant(QString::fromStdString(name));;
@@ -17,14 +18,22 @@ Components::Components(Types type, std::shared_ptr<Components> parent, std::stri
 }
 
 
-Components::Components(Types type, std::shared_ptr<Components> parent, int index)
-    : Components(type, parent, "[" + std::to_string(index) + "]") { }
+Components::Components(StorageTypes type, std::shared_ptr<Components> parent, int index)
+    : Components(type, parent, "[" + std::to_string(index) + "]") {
+    m_nameType = kNumber;
+}
+
+Components::Components(StorageTypes type, std::shared_ptr<Components> parent, bool value)
+    : Components(type, parent, value ? std::string("true"): std::string("false")) {
+    m_nameType = kBoolean;
+}
 
 
-void Components::setValue(std::string value) {
+void Components::setValue(ValueTypes valueType, std::string value) {
     if (m_children.size() != 0)
         throw std::invalid_argument("Value can't be assigned if children are present");
 
+    m_valueType = valueType;
     m_value = QVariant(QString::fromStdString(value));
     m_isValuePresent = true;
 }

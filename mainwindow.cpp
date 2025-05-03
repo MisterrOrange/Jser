@@ -13,7 +13,7 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(ui->executeButton, SIGNAL(clicked()), this, SLOT(Additem()));
 
     clock_t start = clock();
-    processor = new JsonProcessor("C:/Users/admin/source/qt-repos/Jser/Inputs/2.json");
+    processor = new JsonProcessor("C:/Users/admin/source/qt-repos/Jser/Inputs/1.json");
     // in Milliseconds
     float duration = ((clock() - start) * 1000 / CLOCKS_PER_SEC);
     ui->parseDurationLabel->setText(QString::fromStdString("Parsed in " + std::to_string(duration) + " ms"));
