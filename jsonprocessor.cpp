@@ -131,6 +131,30 @@ std::shared_ptr<Components> JsonProcessor::ParseJson(int startIndex) {
             }
             break;
 
+        // Handles null
+        case 'n':
+            if (getCharacter(it+1) == 'u' && getCharacter(it+2) == 'l' && getCharacter(it+3) == 'l') {
+                it += 3;
+                std::shared_ptr<Components> child;
+
+                if (state.top() == kInDictionary) {
+                    if (!valueIncoming) {
+                        throw std::invalid_argument("Null type must not be a key");
+                    }
+                    child = std::make_shared<Components>(Components::kNone, currentComponent, key);
+                    valueIncoming = false;
+                }
+                else if (state.top() == kInArray) {
+                    child = std::make_shared<Components>(Components::kNone, currentComponent, arrayIndex);
+                    arrayIndex++;
+                }
+                else {
+                    throw std::invalid_argument("Invalid state");
+                }
+                child->setValue(Components::kNull, "null");
+                currentComponent->addChild(child);
+            }
+            break;
 
         case '{':
             // Generate child
