@@ -22,9 +22,26 @@ std::shared_ptr<Components> JsonProcessor::ParseJson(int startIndex) {
     for (int it = startIndex; it < mmap.size(); ++it) {
         char character = getCharacter(it);
 
-        // Capture characters for string
         if (!state.empty()) {
             if (state.top() == kInString && character != '"') {
+                // Handle escaped characters
+                if (character == '\\') {
+                    char nextCharacter = getCharacter(it+1);
+                    switch (nextCharacter) {
+                    case 'n': currentString += '\n'; break;
+                    case 't': currentString += '\t'; break;
+                    case '\'': currentString += '\''; break;
+                    case '"': currentString += '"'; break;
+                    case '\\': currentString += '\\'; break;
+                    case 'r': currentString += '\r'; break;
+                    case 'b': currentString += '\b'; break;
+                    case 'f': currentString += '\f'; break;
+                    default:
+                        throw std::invalid_argument("Unknown escape character");
+                    }
+                    it++;
+                    continue;
+                }
                 currentString += character;
                 continue;
             }
