@@ -46,7 +46,7 @@ std::shared_ptr<Components> JsonProcessor::ParseJson(int startIndex) {
                 continue;
             }
             else if (state.top() == kInNumber || state.top() == kInFloat) {
-                // Number has ended
+                // Still in number (or float)
                 if (std::isdigit(character)) {
                     // Capture number
                     currentString += character;
@@ -83,7 +83,6 @@ std::shared_ptr<Components> JsonProcessor::ParseJson(int startIndex) {
                     }
                     currentString = "";
                 }
-                continue;
             }
         }
 
