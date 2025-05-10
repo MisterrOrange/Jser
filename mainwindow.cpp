@@ -12,12 +12,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     QObject::connect(ui->executeButton, SIGNAL(clicked()), this, SLOT(Additem()));
 
-    clock_t start = clock();
-    processor = new JsonProcessor("C:/Users/admin/source/qt-repos/Jser/Inputs/1.json");
-    // in Milliseconds
-    float duration = ((clock() - start) * 1000 / CLOCKS_PER_SEC);
-    ui->parseDurationLabel->setText(QString::fromStdString("Parsed in " + std::to_string(duration) + " ms"));
-    ui->treeView->setModel(processor->getModel());
 }
 
 MainWindow::~MainWindow()
@@ -28,9 +22,12 @@ MainWindow::~MainWindow()
 void MainWindow::Additem() {
     ui->executeButton->setEnabled(false);
 
-    JsonModel *model = processor->getModel();
-
-    ui->treeView->setModel(model);
+    clock_t start = clock();
+    processor = new JsonProcessor("C:/Users/admin/source/qt-repos/Jser/Inputs/d2manifest.json");
+    // in Milliseconds
+    float duration = ((clock() - start) * 1000 / CLOCKS_PER_SEC);
+    ui->parseDurationLabel->setText("Parsed in " + QString::number(duration, 'f', 0) + " ms");
+    ui->treeView->setModel(processor->getModel());
 
     ui->executeButton->setEnabled(true);
 }
