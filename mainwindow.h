@@ -19,13 +19,15 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-
 private:
     Ui::MainWindow *ui;
-    JsonProcessor *processor;
+    std::unique_ptr<JsonProcessor> processor;
+    void resizeEvent(QResizeEvent *event) override;
+    void initializeTreeView(std::string jsonFilePath);
 
 public slots:
-    void Additem();
-
+    void addItem();
+    void openFile();
+    void showTreeView();
 };
 #endif // MAINWINDOW_H

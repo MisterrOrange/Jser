@@ -1,16 +1,20 @@
 #include "jsonprocessor.h"
 
 #include <stack>
+#include <ctime>
+#include <QThread>
 
 
-JsonProcessor::JsonProcessor(std::string path) {
+JsonProcessor::JsonProcessor(std::string path, boolean parse) {
     std::error_code error;
     mmap = mio::make_mmap_source(path, error);
 
-    ParseJson();
+    if (parse)
+        ParseJson();
 }
 
-std::shared_ptr<Components> JsonProcessor::ParseJson(int startIndex) {
+void JsonProcessor::ParseJson(int startIndex) {
+    clock_t startTime = clock();
     std::shared_ptr<Components> currentComponent = nullptr;
 
     std::stack<Status> state;
@@ -19,7 +23,26 @@ std::shared_ptr<Components> JsonProcessor::ParseJson(int startIndex) {
     int arrayIndex = 0;
     // Stores whether next item is value or not
     bool valueIncoming = false;
-    for (int it = startIndex; it < mmap.size(); ++it) {
+
+    // Create stack of 100 int's that indicate when next percantage is reached
+    std::stack<long> percentages;
+    // +1 ensures it's not 0
+    long stepSize = std::ceil(mmap.size() / 100) + 1;
+    int currentPercentage = 0;
+    for (long i = mmap.size(); i - stepSize > 0; i -= stepSize) {
+        percentages.push(i);
+    }
+
+    for (long it = startIndex; it < mmap.size(); ++it) {
+        if (it > percentages.top()) {
+            percentages.pop();
+            emit progressMade(++currentPercentage);
+            // To not check too often
+            if (QThread::currentThread()->isInterruptionRequested()) {
+                m_model.reset();
+                return;
+            }
+        }
         char character = getCharacter(it);
 
         if (!state.empty()) {
@@ -268,7 +291,13 @@ std::shared_ptr<Components> JsonProcessor::ParseJson(int startIndex) {
             break;
         }
     }
-    return currentComponent;
+    parseTime = std::round((clock() - startTime) * 1000 / CLOCKS_PER_SEC);
+    emit parsingComplete();
+    return;
+}
+
+void JsonProcessor::Parse() {
+    ParseJson();
 }
 
 JsonModel* JsonProcessor::getModel() {

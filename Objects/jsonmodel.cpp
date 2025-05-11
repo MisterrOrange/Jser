@@ -18,11 +18,31 @@ QModelIndex JsonModel::index(int row, int column, const QModelIndex &parent) con
 }
 
 QVariant JsonModel::data(const QModelIndex &index, int role) const {
-    if (!index.isValid() || role != Qt::DisplayRole)
+    if (!index.isValid())
         return {};
 
     const Components *item = static_cast<const Components*>(index.internalPointer());
-    return item->data(index.column());
+    switch (role) {
+    // Returns the actual data
+    case Qt::DisplayRole: {
+        if (item->isValuePresent() || index.column() == 0) {
+            // Return data normally
+            return item->data(index.column());
+        }
+        // Return type of storage for column 1
+        return item->convertStorageTypeToString(item->getGeneralType());
+    }
+
+    case Qt::ToolTipRole: {
+        // Return normal data for everything besides column that indicates type
+        if (!item->isValuePresent() && index.column() == 1)
+            return {};
+        return this->data(index, Qt::DisplayRole);
+    }
+
+    default:
+        return {};
+    }
 }
 
 int JsonModel::rowCount(const QModelIndex &parent) const {

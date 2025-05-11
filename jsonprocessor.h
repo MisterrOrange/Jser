@@ -5,12 +5,16 @@
 #include <string>
 #include "lib/mio.hpp"
 #include "Objects/jsonmodel.h"
+#include <QObject>
 
 
-class JsonProcessor
+class JsonProcessor : public QObject
 {
+    Q_OBJECT
+
 public:
-    JsonProcessor(std::string path);
+    JsonProcessor(std::string path, boolean parse = true);
+    void Parse();
     enum Status {
         kInDictionary,
         kInArray,
@@ -21,10 +25,17 @@ public:
     JsonModel* getModel();
 
 private:
-    std::shared_ptr<Components> ParseJson(int startindex = 0);
+    void ParseJson(int startindex = 0);
     char getCharacter(int index);
     mio::mmap_source mmap;
     std::unique_ptr<JsonModel> m_model;
+
+    // In milliseconds
+    int parseTime = 0;
+
+signals:
+    void progressMade(int percentage);
+    void parsingComplete();
 };
 
 #endif // JSONPROCESSOR_H

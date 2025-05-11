@@ -89,3 +89,47 @@ int Components::row() const {
     // Shouldn't happen
     return 0;
 }
+
+
+bool Components::isValuePresent() const {
+    return m_isValuePresent;
+}
+
+Components::StorageTypes Components::getGeneralType() const {
+    return m_generalType;
+}
+
+Components::ValueTypes Components::getNameType() const {
+    return m_nameType;
+}
+
+Components::ValueTypes Components::getValueType() const {
+    return m_valueType;
+}
+
+QString Components::convertValueTypeToString(ValueTypes type) const {
+    switch (type) {
+    case kString:
+        return QString("String");
+    case kNumber:
+        return QString("Integer");
+    case kFloat:
+        return QString("Float");
+    case kBoolean:
+        return QString("Boolean");
+    case kNull:
+        return QString("Null");
+    }
+    return QString();
+}
+QString Components::convertStorageTypeToString(StorageTypes type) const {
+    switch (type) {
+    case kDictionary:
+        return QString("Dictionary");
+    case kArray:
+        return QString("Array");
+    case kNone:
+        return QString("None");
+    }
+    return QString();
+}

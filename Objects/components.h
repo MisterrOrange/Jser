@@ -36,6 +36,14 @@ public:
     int row() const;
     QVariant data(int column) const;
 
+    bool isValuePresent() const;
+    StorageTypes getGeneralType() const;
+    ValueTypes getNameType() const;
+    ValueTypes getValueType() const;
+
+    QString convertValueTypeToString(ValueTypes type) const;
+    QString convertStorageTypeToString(StorageTypes type) const;
+
 private:
     std::weak_ptr<Components> m_parent;
 
