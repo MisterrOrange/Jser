@@ -14,7 +14,6 @@ class JsonProcessor : public QObject
 
 public:
     JsonProcessor(std::string path, boolean parse = true);
-    void Parse();
     enum Status {
         kInDictionary,
         kInArray,
@@ -42,6 +41,9 @@ private:
 signals:
     void progressMade(int percentage);
     void parsingComplete();
+
+public slots:
+    void Parse();
 };
 
 #endif // JSONPROCESSOR_H

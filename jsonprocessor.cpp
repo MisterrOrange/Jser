@@ -306,12 +306,12 @@ void JsonProcessor::ParseJson(int startIndex) {
     }
     successfullyParsed = true;
     parseTime = std::round((clock() - startTime) * 1000 / CLOCKS_PER_SEC);
-    emit parsingComplete();
     return;
 }
 
 void JsonProcessor::Parse() {
     ParseJson();
+    emit parsingComplete();
     return;
 }
 
