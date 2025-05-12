@@ -57,12 +57,16 @@ void MainWindow::initializeTreeView(std::string jsonFilePath) {
     QThread *thread = new QThread();
     processor->moveToThread(thread);
 
-    QObject::connect(thread, &QThread::started, processor.get(), &JsonProcessor::Parse);
+    QObject::connect(thread, &QThread::started, this, [this, thread]() {
+        processor->Parse();
+        thread->quit();
+    });
+
     // Increase progress bar on progress
     QObject::connect(processor.get(), SIGNAL(progressMade(int)), progressWindow, SLOT(setProgressBar(int)));
     // Destroy window and show tree on thread completion
-    QObject::connect(processor.get(), SIGNAL(parsingComplete()), progressWindow, SLOT(destroy()));
-    QObject::connect(processor.get(), SIGNAL(parsingComplete()), this, SLOT(showTreeView()));
+    QObject::connect(thread, &QThread::finished, progressWindow, &ProcessWindow::destroy);
+    QObject::connect(thread, &QThread::finished, this, &MainWindow::showTreeView);
 
     // Delete thread if progress window is destroyed
     QObject::connect(progressWindow, &QObject::destroyed, this, [thread]() { thread->requestInterruption(); });
@@ -72,5 +76,6 @@ void MainWindow::initializeTreeView(std::string jsonFilePath) {
 }
 
 void MainWindow::showTreeView() {
-    ui->treeView->setModel(processor->getModel());
+    if (processor->wasSuccessfullyParsed())
+        ui->treeView->setModel(processor->getModel());
 }

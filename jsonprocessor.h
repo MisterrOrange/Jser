@@ -24,6 +24,9 @@ public:
     };
     JsonModel* getModel();
 
+    boolean wasSuccessfullyParsed();
+    std::string getErrorMessage();
+
 private:
     void ParseJson(int startindex = 0);
     char getCharacter(int index);
@@ -32,6 +35,9 @@ private:
 
     // In milliseconds
     int parseTime = 0;
+
+    boolean successfullyParsed;
+    std::string errorMessage;
 
 signals:
     void progressMade(int percentage);
