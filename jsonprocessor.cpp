@@ -16,6 +16,8 @@ JsonProcessor::JsonProcessor(std::string path, boolean parse) {
 void JsonProcessor::ParseJson(int startIndex) {
     clock_t startTime = clock();
     successfullyParsed = false;
+    errorMessage = "Error while parsing json file: ";
+
     std::shared_ptr<Components> currentComponent = nullptr;
 
     std::stack<Status> state;
@@ -61,7 +63,7 @@ void JsonProcessor::ParseJson(int startIndex) {
                     case 'b': currentString += '\b'; break;
                     case 'f': currentString += '\f'; break;
                     default:
-                        errorMessage = "Unknown escape character";
+                        errorMessage += "Unknown escape character";
                         return;
                     }
                     it++;
@@ -133,7 +135,7 @@ void JsonProcessor::ParseJson(int startIndex) {
                         arrayIndex++;
                     }
                     else {
-                        errorMessage = "Invalid state";
+                        errorMessage += "Invalid state";
                         return;
                     }
                     child->setValue(Components::kBoolean, "false");
@@ -161,7 +163,7 @@ void JsonProcessor::ParseJson(int startIndex) {
                         arrayIndex++;
                     }
                     else {
-                        errorMessage = "Invalid state";
+                        errorMessage += "Invalid state";
                         return;
                     }
                     child->setValue(Components::kBoolean, "true");
@@ -182,7 +184,7 @@ void JsonProcessor::ParseJson(int startIndex) {
 
                 if (state.top() == kInDictionary) {
                     if (!valueIncoming) {
-                       errorMessage = "Null type must not be a key";
+                       errorMessage += "Null type must not be a key";
                         return;
                     }
                     child = std::make_shared<Components>(Components::kNone, currentComponent, key);
@@ -193,7 +195,7 @@ void JsonProcessor::ParseJson(int startIndex) {
                     arrayIndex++;
                 }
                 else {
-                    errorMessage = "Invalid state";
+                    errorMessage += "Invalid state";
                     return;
                 }
                 child->setValue(Components::kNull, "null");
@@ -223,7 +225,7 @@ void JsonProcessor::ParseJson(int startIndex) {
             if (state.empty()) { continue; }
 
             if (currentComponent == nullptr) {
-                errorMessage = "Component pointer is null";
+                errorMessage += "Component pointer is null";
                 return;
             }
             // Set currentComponent to it's parent
@@ -248,7 +250,7 @@ void JsonProcessor::ParseJson(int startIndex) {
                     currentComponent = std::make_shared<Components>(Components::kArray, currentComponent, arrayIndex);
                 }
                 else {
-                    errorMessage = "State is invalid";
+                    errorMessage += "State is invalid";
                     return;
                 }
                 currentComponent->parent()->addChild(currentComponent);
@@ -259,7 +261,7 @@ void JsonProcessor::ParseJson(int startIndex) {
 
         case ']':
             if (state.top() != kInArray) {
-                errorMessage = "Expected array closure";
+                errorMessage += "Expected array closure";
                 return;
             }
             state.pop();

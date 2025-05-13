@@ -7,6 +7,8 @@
 #include <ctime>
 #include <QFileDialog>
 #include <QThread>
+#include <QMessageBox>
+#include <QString>
 #include "processwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -75,6 +77,12 @@ void MainWindow::initializeTreeView(std::string jsonFilePath) {
 }
 
 void MainWindow::showTreeView() {
-    if (processor->wasSuccessfullyParsed())
+    if (processor->wasSuccessfullyParsed()) {
         ui->treeView->setModel(processor->getModel());
+        return;
+    }
+    QMessageBox errorBox(this);
+    errorBox.setText(QString::fromStdString(processor->getErrorMessage()));
+    errorBox.addButton(QMessageBox::StandardButton::Close);
+    errorBox.exec();
 }
