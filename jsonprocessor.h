@@ -1,7 +1,6 @@
 #ifndef JSONPROCESSOR_H
 #define JSONPROCESSOR_H
 
-#include "Objects/components.h"
 #include <string>
 #include "lib/mio.hpp"
 #include "Objects/jsonmodel.h"
@@ -37,6 +36,8 @@ private:
 
     boolean successfullyParsed;
     std::string errorMessage;
+    // captureBefore specifies how many characters before error should be displayed. same goes for captureAfter
+    void logError(std::string message, int position, int captureBefore, int captureAfter);
 
 signals:
     void progressMade(int percentage);

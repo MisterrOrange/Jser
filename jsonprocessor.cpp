@@ -1,4 +1,5 @@
 #include "jsonprocessor.h"
+#include "Objects/components.h"
 
 #include <stack>
 #include <ctime>
@@ -16,7 +17,6 @@ JsonProcessor::JsonProcessor(std::string path, boolean parse) {
 void JsonProcessor::ParseJson(int startIndex) {
     clock_t startTime = clock();
     successfullyParsed = false;
-    errorMessage = "Error while parsing json file: ";
 
     std::shared_ptr<Components> currentComponent = nullptr;
 
@@ -63,7 +63,7 @@ void JsonProcessor::ParseJson(int startIndex) {
                     case 'b': currentString += '\b'; break;
                     case 'f': currentString += '\f'; break;
                     default:
-                        errorMessage += "Unknown escape character";
+                        logError("Unknown escape character", it, 0, 1);
                         return;
                     }
                     it++;
@@ -135,7 +135,8 @@ void JsonProcessor::ParseJson(int startIndex) {
                         arrayIndex++;
                     }
                     else {
-                        errorMessage += "Invalid state";
+                        // Shouldn't happen
+                        logError("Invalid state", it, 10, 2);
                         return;
                     }
                     child->setValue(Components::kBoolean, "false");
@@ -163,7 +164,8 @@ void JsonProcessor::ParseJson(int startIndex) {
                         arrayIndex++;
                     }
                     else {
-                        errorMessage += "Invalid state";
+                        // Shouldn't happen too
+                        logError("Invalid state", it, 10, 2);
                         return;
                     }
                     child->setValue(Components::kBoolean, "true");
@@ -184,7 +186,7 @@ void JsonProcessor::ParseJson(int startIndex) {
 
                 if (state.top() == kInDictionary) {
                     if (!valueIncoming) {
-                       errorMessage += "Null type must not be a key";
+                        logError("Null type must not be a key", it, 20, 2);
                         return;
                     }
                     child = std::make_shared<Components>(Components::kNone, currentComponent, key);
@@ -195,7 +197,7 @@ void JsonProcessor::ParseJson(int startIndex) {
                     arrayIndex++;
                 }
                 else {
-                    errorMessage += "Invalid state";
+                    logError("Invalid state", it, 20, 5);
                     return;
                 }
                 child->setValue(Components::kNull, "null");
@@ -225,7 +227,7 @@ void JsonProcessor::ParseJson(int startIndex) {
             if (state.empty()) { continue; }
 
             if (currentComponent == nullptr) {
-                errorMessage += "Component pointer is null";
+                throw new std::invalid_argument("Component pointer is null");
                 return;
             }
             // Set currentComponent to it's parent
@@ -250,7 +252,7 @@ void JsonProcessor::ParseJson(int startIndex) {
                     currentComponent = std::make_shared<Components>(Components::kArray, currentComponent, arrayIndex);
                 }
                 else {
-                    errorMessage += "State is invalid";
+                    logError("State is invalid", it, 20, 2);
                     return;
                 }
                 currentComponent->parent()->addChild(currentComponent);
@@ -261,7 +263,7 @@ void JsonProcessor::ParseJson(int startIndex) {
 
         case ']':
             if (state.top() != kInArray) {
-                errorMessage += "Expected array closure";
+                logError("Expected array closure", it, 20,0);
                 return;
             }
             state.pop();
@@ -335,5 +337,18 @@ std::string JsonProcessor::getErrorMessage() {
     if (successfullyParsed)
         return "";
     return errorMessage;
+}
+
+
+void JsonProcessor::logError(std::string message, int position, int captureBefore, int captureAfter) {
+    std::string capturedString;
+    // Captures last 5 characters
+    for (int i = position - captureBefore; i != position + captureAfter + 1; i++) {
+        if (i < 0 || i > mmap.size())
+            continue;
+        capturedString += getCharacter(i);
+    }
+    errorMessage = "Encountered an error while parsing the json file at position " + std::to_string(position) + "\nError message: " + message + "\nJson string: " + capturedString;
+    return;
 }
 
