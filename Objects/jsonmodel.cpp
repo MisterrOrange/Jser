@@ -1,5 +1,6 @@
 #include "jsonmodel.h"
 #include "components.h"
+#include <QFont>
 
 JsonModel::JsonModel(std::shared_ptr<Components> rootElement) {
     m_rootElement = rootElement;
@@ -32,12 +33,19 @@ QVariant JsonModel::data(const QModelIndex &index, int role) const {
         // Return type of storage for column 1
         return item->convertStorageTypeToString(item->getGeneralType());
     }
-
+    // What's being displayed as tooltips
     case Qt::ToolTipRole: {
         // Return normal data for everything besides column that indicates type
         if (!item->isValuePresent() && index.column() == 1)
             return {};
         return this->data(index, Qt::DisplayRole);
+    }
+
+    case Qt::FontRole: {
+        QFont font;
+        if (!item->isValuePresent() && index.column() == 1)
+            font.setItalic(true);
+        return font;
     }
 
     default:

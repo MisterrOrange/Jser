@@ -28,14 +28,18 @@ public:
 private:
     void ParseJson(int startindex = 0);
     char getCharacter(int index);
-    mio::mmap_source mmap;
+
+    boolean setMap();
+    void deleteMap();
+
+    std::string m_filePath;
+    mio::mmap_source m_map;
     std::unique_ptr<JsonModel> m_model;
-
     // In milliseconds
-    int parseTime = 0;
+    int m_parseTime = 0;
 
-    boolean successfullyParsed;
-    std::string errorMessage;
+    boolean m_successfullyParsed;
+    std::string m_errorMessage;
     // captureBefore specifies how many characters before error should be displayed. same goes for captureAfter
     void logError(std::string message, int position, int captureBefore, int captureAfter);
 

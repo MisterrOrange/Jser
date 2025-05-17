@@ -26,8 +26,8 @@ private:
     void initializeTreeView(std::string jsonFilePath);
 
 public slots:
-    void addItem();
     void openFile();
     void showTreeView();
+    void handleContextMenu(const QPoint &pos);
 };
 #endif // MAINWINDOW_H

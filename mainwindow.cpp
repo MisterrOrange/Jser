@@ -9,6 +9,10 @@
 #include <QThread>
 #include <QMessageBox>
 #include <QString>
+#include <QMenu>
+#include <QClipboard>
+#include <QGuiApplication>
+#include "Objects/components.h"
 #include "processwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -18,19 +22,12 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     ui->treeView->setHeaderHidden(true);
 
-    QObject::connect(ui->executeButton, SIGNAL(clicked()), this, SLOT(addItem()));
     QObject::connect(ui->actionOpen_File, SIGNAL(triggered()), this, SLOT(openFile()));
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
-}
-
-void MainWindow::addItem() {
-    ui->executeButton->setEnabled(false);
-
-    ui->executeButton->setEnabled(true);
 }
 
 void MainWindow::openFile() {
@@ -79,6 +76,8 @@ void MainWindow::initializeTreeView(std::string jsonFilePath) {
 void MainWindow::showTreeView() {
     if (processor->wasSuccessfullyParsed()) {
         ui->treeView->setModel(processor->getModel());
+        ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
+        QObject::connect(ui->treeView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(handleContextMenu(QPoint)));
         return;
     }
     QMessageBox errorBox(this);
@@ -86,3 +85,36 @@ void MainWindow::showTreeView() {
     errorBox.addButton(QMessageBox::StandardButton::Close);
     errorBox.exec();
 }
+
+void MainWindow::handleContextMenu(const QPoint &pos) {
+    QModelIndex index = ui->treeView->indexAt(pos);
+    if (!index.isValid())
+        return;
+    const Components *item = static_cast<const Components*>(index.internalPointer());
+
+
+    QMenu menu(this);
+    QAction* keyAction = menu.addAction("Copy Key");
+    QAction* valueAction = menu.addAction("Copy Value");
+
+    if (!item->isValuePresent()) {
+        valueAction->setEnabled(false);
+    }
+
+    QObject::connect(keyAction, &QAction::triggered, this, [index] () mutable {
+        if (index.column() != 0) {
+            index = index.siblingAtColumn(0);
+        }
+        QString data = index.data(Qt::DisplayRole).toString();
+        QGuiApplication::clipboard()->setText(data);
+    });
+    QObject::connect(valueAction, &QAction::triggered, this, [index] () mutable {
+        if (index.column() != 1) {
+            index = index.siblingAtColumn(1);
+        }
+        QString data = index.data(Qt::DisplayRole).toString();
+        QGuiApplication::clipboard()->setText(data);
+    });
+    menu.exec(ui->treeView->viewport()->mapToGlobal(pos));
+}
+

@@ -7,8 +7,7 @@
 
 
 JsonProcessor::JsonProcessor(std::string path, boolean parse) {
-    std::error_code error;
-    mmap = mio::make_mmap_source(path, error);
+    m_filePath = path;
 
     if (parse)
         ParseJson();
@@ -16,9 +15,13 @@ JsonProcessor::JsonProcessor(std::string path, boolean parse) {
 
 void JsonProcessor::ParseJson(int startIndex) {
     clock_t startTime = clock();
-    successfullyParsed = false;
+    m_successfullyParsed = false;
 
     std::shared_ptr<Components> currentComponent = nullptr;
+
+    if (!setMap()) {
+        return;
+    }
 
     std::stack<Status> state;
     std::string key;
@@ -30,13 +33,13 @@ void JsonProcessor::ParseJson(int startIndex) {
     // Create stack of 100 int's that indicate when next percantage is reached
     std::stack<long> percentages;
     // +1 ensures it's not 0
-    long stepSize = std::ceil(mmap.size() / 100) + 1;
+    long stepSize = std::ceil(m_map.size() / 100) + 1;
     int currentPercentage = 0;
-    for (long i = mmap.size(); i - stepSize > 0; i -= stepSize) {
+    for (long i = m_map.size(); i - stepSize > 0; i -= stepSize) {
         percentages.push(i);
     }
 
-    for (long it = startIndex; it < mmap.size(); ++it) {
+    for (long it = startIndex; it < m_map.size(); ++it) {
         if (it > percentages.top()) {
             percentages.pop();
             emit progressMade(++currentPercentage);
@@ -308,8 +311,9 @@ void JsonProcessor::ParseJson(int startIndex) {
             break;
         }
     }
-    successfullyParsed = true;
-    parseTime = std::round((clock() - startTime) * 1000 / CLOCKS_PER_SEC);
+    deleteMap();
+    m_successfullyParsed = true;
+    m_parseTime = std::round((clock() - startTime) * 1000 / CLOCKS_PER_SEC);
     return;
 }
 
@@ -324,19 +328,19 @@ JsonModel* JsonProcessor::getModel() {
 }
 
 char JsonProcessor::getCharacter(int index) {
-    if (index > mmap.size())
+    if (index > m_map.size())
         throw new std::invalid_argument("File index out of range");
-    return mmap[index];
+    return m_map[index];
 }
 
 boolean JsonProcessor::wasSuccessfullyParsed() {
-    return successfullyParsed;
+    return m_successfullyParsed;
 }
 
 std::string JsonProcessor::getErrorMessage() {
-    if (successfullyParsed)
+    if (m_successfullyParsed)
         return "";
-    return errorMessage;
+    return m_errorMessage;
 }
 
 
@@ -344,11 +348,28 @@ void JsonProcessor::logError(std::string message, int position, int captureBefor
     std::string capturedString;
     // Captures last 5 characters
     for (int i = position - captureBefore; i != position + captureAfter + 1; i++) {
-        if (i < 0 || i > mmap.size())
+        if (i < 0 || i > m_map.size())
             continue;
         capturedString += getCharacter(i);
     }
-    errorMessage = "Encountered an error while parsing the json file at position " + std::to_string(position) + "\nError message: " + message + "\nJson string: " + capturedString;
+    m_errorMessage = "Encountered an error while parsing the json file at position " + std::to_string(position) + "\nError message: " + message + "\nJson string: " + capturedString;
     return;
 }
 
+boolean JsonProcessor::setMap() {
+    if (m_filePath == "") {
+        m_errorMessage = "No file path";
+        return false;
+    }
+    std::error_code error;
+    m_map = mio::make_mmap_source(m_filePath, error);
+    if (!error) {
+        return true;
+    }
+    m_errorMessage = "Unable to map file";
+    return false;
+}
+
+void JsonProcessor::deleteMap() {
+    m_map.unmap();
+}
