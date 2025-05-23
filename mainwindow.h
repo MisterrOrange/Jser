@@ -24,6 +24,7 @@ private:
     std::unique_ptr<JsonProcessor> processor;
     void resizeEvent(QResizeEvent *event) override;
     void initializeTreeView(std::string jsonFilePath);
+    void openSettings();
 
 public slots:
     void openFile();

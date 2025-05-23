@@ -14,6 +14,7 @@
 #include <QGuiApplication>
 #include "Objects/components.h"
 #include "processwindow.h"
+#include "settingswindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -23,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->treeView->setHeaderHidden(true);
 
     QObject::connect(ui->actionOpen_File, SIGNAL(triggered()), this, SLOT(openFile()));
+    QObject::connect(ui->actionSettings, &QAction::triggered, this, &MainWindow::openSettings);
 }
 
 MainWindow::~MainWindow()
@@ -35,6 +37,11 @@ void MainWindow::openFile() {
     if (filePath == "")
         return;
     initializeTreeView(filePath.toStdString());
+}
+
+void MainWindow::openSettings() {
+    SettingsWindow *settings = new SettingsWindow(this);
+    settings->exec();
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event) {
@@ -50,8 +57,6 @@ void MainWindow::initializeTreeView(std::string jsonFilePath) {
     ProcessWindow *progressWindow = new ProcessWindow(this);
     processor.reset();
     processor = std::make_unique<JsonProcessor>(jsonFilePath, false);
-
-    progressWindow->show();
 
     QThread *thread = new QThread();
     processor->moveToThread(thread);
@@ -71,6 +76,7 @@ void MainWindow::initializeTreeView(std::string jsonFilePath) {
 
     ui->treeView->setModel(nullptr);
     thread->start();
+    progressWindow->exec();
 }
 
 void MainWindow::showTreeView() {

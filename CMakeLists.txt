@@ -35,8 +35,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         jsonprocessor.h jsonprocessor.cpp
         Objects/jsonmodel.h Objects/jsonmodel.cpp
         processwindow.h processwindow.cpp processwindow.ui
-
-
+        settingswindow.h settingswindow.cpp settingswindow.ui
 
     )
 # Define target properties for Android with Qt 6 as:
