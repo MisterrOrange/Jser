@@ -15,6 +15,7 @@
 #include "Objects/components.h"
 #include "processwindow.h"
 #include "settingswindow.h"
+#include "Objects/settings.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -23,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     ui->treeView->setHeaderHidden(true);
 
+    Settings::loadSettings();
     QObject::connect(ui->actionOpen_File, SIGNAL(triggered()), this, SLOT(openFile()));
     QObject::connect(ui->actionSettings, &QAction::triggered, this, &MainWindow::openSettings);
 }

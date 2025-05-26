@@ -9,6 +9,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_SOURCE_DIR}")
+
 if (MSVC)
     add_compile_options(/Zc:__cplusplus)
     add_compile_options(/permissive-)
@@ -36,6 +38,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         Objects/jsonmodel.h Objects/jsonmodel.cpp
         processwindow.h processwindow.cpp processwindow.ui
         settingswindow.h settingswindow.cpp settingswindow.ui
+        Objects/settings.h Objects/settings.cpp
+
 
     )
 # Define target properties for Android with Qt 6 as:
