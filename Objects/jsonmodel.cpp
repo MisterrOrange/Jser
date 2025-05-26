@@ -1,6 +1,8 @@
 #include "jsonmodel.h"
 #include "components.h"
+#include "settings.h"
 #include <QFont>
+#include <QColor>
 
 JsonModel::JsonModel(std::shared_ptr<Components> rootElement) {
     m_rootElement = rootElement;
@@ -30,6 +32,8 @@ QVariant JsonModel::data(const QModelIndex &index, int role) const {
             // Return data normally
             return item->data(index.column());
         }
+        if (!Settings::getShowStorageName())
+            return {};
         // Return type of storage for column 1
         return item->convertStorageTypeToString(item->getGeneralType());
     }
@@ -46,6 +50,51 @@ QVariant JsonModel::data(const QModelIndex &index, int role) const {
         if (!item->isValuePresent() && index.column() == 1)
             font.setItalic(true);
         return font;
+    }
+
+    case Qt::ForegroundRole: {
+        std::string colour;
+        if (index.column() == 1 && !item->isValuePresent()) {
+            if (item->getGeneralType() == Components::StorageTypes::kArray)
+                colour = Settings::getArrayColour();
+            else
+                colour = Settings::getDictionaryColour();
+            return generateBrush(colour);
+        }
+        Components::ValueTypes type;
+        if (index.column() == 0)
+            type = item->getNameType();
+        else
+            type = item->getValueType();
+        switch(type) {
+        case Components::ValueTypes::kString: {
+            colour = Settings::getStringColour();
+            break;
+        }
+        case Components::ValueTypes::kNumber: {
+            colour = Settings::getNumberColour();
+            break;
+        }
+        case Components::ValueTypes::kFloat: {
+            colour = Settings::getFloatColour();
+            break;
+        }
+        case Components::ValueTypes::kBoolean: {
+            colour = Settings::getBooleanColour();
+            break;
+        }
+        case Components::ValueTypes::kNull: {
+            colour = Settings::getNullColour();
+            break;
+        }
+        case Components::ValueTypes::kArrayIndex: {
+            colour = Settings::getArrayIndexColour();
+            break;
+        }
+        default:
+            colour = "FFFFFF";
+        }
+        return generateBrush(colour);
     }
 
     default:
@@ -76,4 +125,16 @@ QModelIndex JsonModel::parent(const QModelIndex &index) const {
     Components *parentItem = childItem->parent().get();
 
     return parentItem != m_rootElement.get() ? createIndex(parentItem->row(), 0, parentItem) : QModelIndex{};
+}
+
+QBrush JsonModel::generateBrush(std::string colourCode) const {
+    int red =   convertHexToDecimal(colourCode.substr(0, 2));
+    int green = convertHexToDecimal(colourCode.substr(2, 2));
+    int blue =  convertHexToDecimal(colourCode.substr(4, 2));
+    QBrush brush(QColor(red, green, blue));
+    return brush;
+}
+
+int JsonModel::convertHexToDecimal(std::string hex) const {
+    return std::stoul(hex, nullptr, 16);
 }

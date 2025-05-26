@@ -20,7 +20,7 @@ Components::Components(StorageTypes type, std::shared_ptr<Components> parent, st
 
 Components::Components(StorageTypes type, std::shared_ptr<Components> parent, int index)
     : Components(type, parent, "[" + std::to_string(index) + "]") {
-    m_nameType = kNumber;
+    m_nameType = kArrayIndex;
 }
 
 Components::Components(StorageTypes type, std::shared_ptr<Components> parent, bool value)
@@ -119,6 +119,8 @@ QString Components::convertValueTypeToString(ValueTypes type) const {
         return QString("Boolean");
     case kNull:
         return QString("Null");
+    case kArrayIndex:
+        return QString("ArrayIndex");
     }
     return QString();
 }

@@ -16,6 +16,11 @@ public:
     static std::string getFloatColour();
     static std::string getBooleanColour();
     static std::string getNullColour();
+    static std::string getArrayIndexColour();
+    static std::string getDictionaryColour();
+    static std::string getArrayColour();
+
+    static bool getShowStorageName();
 
 private:
     static void saveSettingsToFile();
@@ -29,6 +34,11 @@ private:
     static std::string floatColour;
     static std::string booleanColour;
     static std::string nullColour;
+    static std::string arrayIndexColour;
+    static std::string dictionaryColour;
+    static std::string arrayColour;
+
+    static bool showStorageName;
 };
 
 #endif // SETTINGS_H

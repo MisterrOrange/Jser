@@ -22,6 +22,9 @@ private:
     Ui::SettingsWindow *ui;
     void saveSettings();
     void showErrorMessage(std::string message);
+
+private slots:
+    void handleShowStorageNameCheckbox(Qt::CheckState state);
 };
 
 #endif // SETTINGSWINDOW_H

@@ -14,7 +14,8 @@ public:
         kNumber,
         kFloat,
         kBoolean,
-        kNull
+        kNull,
+        kArrayIndex
     };
     enum StorageTypes {
         kDictionary,

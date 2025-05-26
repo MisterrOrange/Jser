@@ -19,6 +19,13 @@ SettingsWindow::SettingsWindow(QWidget *parent)
     ui->floatColour->setText(QString::fromStdString(Settings::getFloatColour()));
     ui->booleanColour->setText(QString::fromStdString(Settings::getBooleanColour()));
     ui->nullColour->setText(QString::fromStdString(Settings::getNullColour()));
+    ui->arrayIndexColour->setText(QString::fromStdString(Settings::getArrayIndexColour()));
+    ui->arrayColour->setText(QString::fromStdString(Settings::getArrayColour()));
+    ui->dictionaryColour->setText(QString::fromStdString(Settings::getDictionaryColour()));
+    ui->showStorageNameCheckbox->setCheckState(Settings::getShowStorageName() ? Qt::Checked : Qt::Unchecked);
+
+    QObject::connect(ui->showStorageNameCheckbox, &QCheckBox::checkStateChanged, this, &SettingsWindow::handleShowStorageNameCheckbox);
+    handleShowStorageNameCheckbox(ui->showStorageNameCheckbox->checkState());
 }
 
 SettingsWindow::~SettingsWindow()
@@ -32,7 +39,10 @@ void SettingsWindow::saveSettings() {
         !verifyHexColour(ui->numberColour->text().toStdString()) ||
         !verifyHexColour(ui->floatColour->text().toStdString()) ||
         !verifyHexColour(ui->booleanColour->text().toStdString()) ||
-        !verifyHexColour(ui->nullColour->text().toStdString())) {
+        !verifyHexColour(ui->nullColour->text().toStdString()) ||
+        !verifyHexColour(ui->arrayIndexColour->text().toStdString()) ||
+        !verifyHexColour(ui->dictionaryColour->text().toStdString()) ||
+        !verifyHexColour(ui->arrayColour->text().toStdString())) {
         showErrorMessage("Invalid hex colour");
         return;
     }
@@ -53,4 +63,15 @@ bool SettingsWindow::verifyHexColour(std::string colour) {
     return std::all_of(colour.begin(), colour.end(), [](char c) {
         return std::isxdigit(static_cast<unsigned char>(c));
     });
+}
+
+void SettingsWindow::handleShowStorageNameCheckbox(Qt::CheckState state) {
+    if (state == Qt::Checked) {
+        ui->arrayColour->setEnabled(true);
+        ui->dictionaryColour->setEnabled(true);
+    }
+    else {
+        ui->arrayColour->setEnabled(false);
+        ui->dictionaryColour->setEnabled(false);
+    }
 }

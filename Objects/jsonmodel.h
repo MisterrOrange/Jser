@@ -4,6 +4,7 @@
 #include <QVariant>
 #include <QModelIndex>
 #include <QAbstractItemModel>
+#include <QBrush>
 
 class Components;
 class JsonModel : public QAbstractItemModel
@@ -23,6 +24,9 @@ public:
 
 private:
     std::shared_ptr<Components> m_rootElement;
+
+    QBrush generateBrush(std::string colourCode) const;
+    int convertHexToDecimal(std::string hex) const;
 };
 
 #endif // JSONMODEL_H
