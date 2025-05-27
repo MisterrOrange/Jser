@@ -33,7 +33,7 @@ QVariant JsonModel::data(const QModelIndex &index, int role) const {
             // Return data normally
             return item->data(index.column());
         }
-        if (!settings.value("showStorageName").toBool())
+        if (!settings.value("showStorageName", true).toBool())
             return {};
         // Return type of storage for column 1
         return item->convertStorageTypeToString(item->getGeneralType());
@@ -57,9 +57,9 @@ QVariant JsonModel::data(const QModelIndex &index, int role) const {
         std::string colour;
         if (index.column() == 1 && !item->isValuePresent()) {
             if (item->getGeneralType() == Components::StorageTypes::kArray)
-                colour = settings.value("arrayColour").toString().toStdString();
+                colour = settings.value("arrayColour", "D4D4D4").toString().toStdString();
             else
-                colour = settings.value("dictionaryColour").toString().toStdString();
+                colour = settings.value("dictionaryColour", "D4D4D4").toString().toStdString();
             return generateBrush(colour);
         }
         Components::ValueTypes type;
@@ -69,27 +69,27 @@ QVariant JsonModel::data(const QModelIndex &index, int role) const {
             type = item->getValueType();
         switch(type) {
         case Components::ValueTypes::kString: {
-            colour = settings.value("stringColour").toString().toStdString();
+            colour = settings.value("stringColour", "CE9178").toString().toStdString();
             break;
         }
         case Components::ValueTypes::kNumber: {
-            colour = settings.value("numberColour").toString().toStdString();
+            colour = settings.value("numberColour", "B5CEA8").toString().toStdString();
             break;
         }
         case Components::ValueTypes::kFloat: {
-            colour = settings.value("floatColour").toString().toStdString();
+            colour = settings.value("floatColour", "B5CEA8").toString().toStdString();
             break;
         }
         case Components::ValueTypes::kBoolean: {
-            colour = settings.value("booleanColour").toString().toStdString();
+            colour = settings.value("booleanColour", "569CD6").toString().toStdString();
             break;
         }
         case Components::ValueTypes::kNull: {
-            colour = settings.value("nullColour").toString().toStdString();
+            colour = settings.value("nullColour", "569CD6").toString().toStdString();
             break;
         }
         case Components::ValueTypes::kArrayIndex: {
-            colour = settings.value("arrayIndexColour").toString().toStdString();
+            colour = settings.value("arrayIndexColour", "B5CEA8").toString().toStdString();
             break;
         }
 

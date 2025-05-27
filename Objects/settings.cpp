@@ -51,3 +51,8 @@ std::string Settings::toUpper(std::string string) {
     for (auto & c: string) c = toupper(c);
     return string;
 }
+
+void Settings::deleteData() {
+    QSettings settings;
+    settings.clear();
+}

@@ -14,6 +14,10 @@ SettingsWindow::SettingsWindow(QWidget *parent)
     QObject::connect(ui->cancelButton, &QPushButton::clicked, this, [this] () {
         delete this;
     });
+    QObject::connect(ui->deleteDataButton, &QPushButton::clicked, this, [this] () {
+        Settings::deleteData();
+        delete this; // To make it feel like something happened
+    });
 
     QSettings settings;
     ui->stringColour->setText(settings.value("stringColour", "CE9178").toString());
@@ -25,7 +29,7 @@ SettingsWindow::SettingsWindow(QWidget *parent)
     ui->arrayColour->setText(settings.value("arrayColour", "D4D4D4").toString());
     ui->dictionaryColour->setText(settings.value("dictionaryColour", "D4D4D4").toString());
 
-    ui->showStorageNameCheckbox->setCheckState(settings.value("showStorageName", false).toBool() ? Qt::Checked : Qt::Unchecked);
+    ui->showStorageNameCheckbox->setCheckState(settings.value("showStorageName", true).toBool() ? Qt::Checked : Qt::Unchecked);
 
     QObject::connect(ui->showStorageNameCheckbox, &QCheckBox::checkStateChanged, this, &SettingsWindow::handleShowStorageNameCheckbox);
     handleShowStorageNameCheckbox(ui->showStorageNameCheckbox->checkState());
