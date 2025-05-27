@@ -2,6 +2,7 @@
 #include "ui_settingswindow.h"
 #include "Objects/settings.h"
 #include <QMessageBox>
+#include <QSettings>
 
 SettingsWindow::SettingsWindow(QWidget *parent)
     : QDialog(parent)
@@ -14,15 +15,17 @@ SettingsWindow::SettingsWindow(QWidget *parent)
         delete this;
     });
 
-    ui->stringColour->setText(QString::fromStdString(Settings::getStringColour()));
-    ui->numberColour->setText(QString::fromStdString(Settings::getNumberColour()));
-    ui->floatColour->setText(QString::fromStdString(Settings::getFloatColour()));
-    ui->booleanColour->setText(QString::fromStdString(Settings::getBooleanColour()));
-    ui->nullColour->setText(QString::fromStdString(Settings::getNullColour()));
-    ui->arrayIndexColour->setText(QString::fromStdString(Settings::getArrayIndexColour()));
-    ui->arrayColour->setText(QString::fromStdString(Settings::getArrayColour()));
-    ui->dictionaryColour->setText(QString::fromStdString(Settings::getDictionaryColour()));
-    ui->showStorageNameCheckbox->setCheckState(Settings::getShowStorageName() ? Qt::Checked : Qt::Unchecked);
+    QSettings settings;
+    ui->stringColour->setText(settings.value("stringColour", "CE9178").toString());
+    ui->numberColour->setText(settings.value("numberColour", "B5CEA8").toString());
+    ui->floatColour->setText(settings.value("floatColour", "B5CEA8").toString());
+    ui->booleanColour->setText(settings.value("booleanColour", "569CD6").toString());
+    ui->nullColour->setText(settings.value("nullColour", "569CD6").toString());
+    ui->arrayIndexColour->setText(settings.value("arrayIndexColour", "B5CEA8").toString());
+    ui->arrayColour->setText(settings.value("arrayColour", "D4D4D4").toString());
+    ui->dictionaryColour->setText(settings.value("dictionaryColour", "D4D4D4").toString());
+
+    ui->showStorageNameCheckbox->setCheckState(settings.value("showStorageName", false).toBool() ? Qt::Checked : Qt::Unchecked);
 
     QObject::connect(ui->showStorageNameCheckbox, &QCheckBox::checkStateChanged, this, &SettingsWindow::handleShowStorageNameCheckbox);
     handleShowStorageNameCheckbox(ui->showStorageNameCheckbox->checkState());

@@ -1,8 +1,8 @@
 #include "jsonmodel.h"
 #include "components.h"
-#include "settings.h"
 #include <QFont>
 #include <QColor>
+#include <QSettings>
 
 JsonModel::JsonModel(std::shared_ptr<Components> rootElement) {
     m_rootElement = rootElement;
@@ -24,6 +24,7 @@ QVariant JsonModel::data(const QModelIndex &index, int role) const {
     if (!index.isValid())
         return {};
 
+    QSettings settings;
     const Components *item = static_cast<const Components*>(index.internalPointer());
     switch (role) {
     // Returns the actual data
@@ -32,7 +33,7 @@ QVariant JsonModel::data(const QModelIndex &index, int role) const {
             // Return data normally
             return item->data(index.column());
         }
-        if (!Settings::getShowStorageName())
+        if (!settings.value("showStorageName").toBool())
             return {};
         // Return type of storage for column 1
         return item->convertStorageTypeToString(item->getGeneralType());
@@ -56,9 +57,9 @@ QVariant JsonModel::data(const QModelIndex &index, int role) const {
         std::string colour;
         if (index.column() == 1 && !item->isValuePresent()) {
             if (item->getGeneralType() == Components::StorageTypes::kArray)
-                colour = Settings::getArrayColour();
+                colour = settings.value("arrayColour").toString().toStdString();
             else
-                colour = Settings::getDictionaryColour();
+                colour = settings.value("dictionaryColour").toString().toStdString();
             return generateBrush(colour);
         }
         Components::ValueTypes type;
@@ -68,29 +69,30 @@ QVariant JsonModel::data(const QModelIndex &index, int role) const {
             type = item->getValueType();
         switch(type) {
         case Components::ValueTypes::kString: {
-            colour = Settings::getStringColour();
+            colour = settings.value("stringColour").toString().toStdString();
             break;
         }
         case Components::ValueTypes::kNumber: {
-            colour = Settings::getNumberColour();
+            colour = settings.value("numberColour").toString().toStdString();
             break;
         }
         case Components::ValueTypes::kFloat: {
-            colour = Settings::getFloatColour();
+            colour = settings.value("floatColour").toString().toStdString();
             break;
         }
         case Components::ValueTypes::kBoolean: {
-            colour = Settings::getBooleanColour();
+            colour = settings.value("booleanColour").toString().toStdString();
             break;
         }
         case Components::ValueTypes::kNull: {
-            colour = Settings::getNullColour();
+            colour = settings.value("nullColour").toString().toStdString();
             break;
         }
         case Components::ValueTypes::kArrayIndex: {
-            colour = Settings::getArrayIndexColour();
+            colour = settings.value("arrayIndexColour").toString().toStdString();
             break;
         }
+
         default:
             colour = "FFFFFF";
         }
