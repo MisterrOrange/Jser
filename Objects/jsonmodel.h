@@ -18,6 +18,7 @@ public:
 
     QModelIndex index(int row, int column, const QModelIndex &parent = {}) const override;
     QVariant data(const QModelIndex &index, int role) const override;
+    bool isRealData(const QModelIndex &index) const;
     QModelIndex parent(const QModelIndex &index) const override;
     int rowCount(const QModelIndex &parent = {}) const override;
     int columnCount(const QModelIndex &parent = {}) const override;

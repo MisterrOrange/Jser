@@ -12,9 +12,11 @@
 #include <QMenu>
 #include <QClipboard>
 #include <QGuiApplication>
+#include <QSettings>
 #include "Objects/components.h"
 #include "processwindow.h"
 #include "settingswindow.h"
+#include "searchresultwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -25,6 +27,12 @@ MainWindow::MainWindow(QWidget *parent)
 
     QObject::connect(ui->actionOpen_File, SIGNAL(triggered()), this, SLOT(openFile()));
     QObject::connect(ui->actionSettings, &QAction::triggered, this, &MainWindow::openSettings);
+    QObject::connect(ui->searchButton, &QPushButton::clicked, this, [this]() {
+        SearchResultWindow *resultWindow = new SearchResultWindow(this, this);
+        resultWindow->show();
+    });
+    QSettings settings;
+    this->restoreGeometry(settings.value("mainWindowWindowGeometry").toByteArray());
 }
 
 MainWindow::~MainWindow()
@@ -53,6 +61,13 @@ void MainWindow::resizeEvent(QResizeEvent *event) {
     ui->treeView->header()->resizeSection(1, halfWidth);
 }
 
+void MainWindow::closeEvent(QCloseEvent *e) {
+    QSettings settings;
+    settings.setValue("mainWindowWindowGeometry", saveGeometry());
+
+    QWidget::closeEvent(e);
+}
+
 void MainWindow::initializeTreeView(std::string jsonFilePath) {
     ProcessWindow *progressWindow = new ProcessWindow(this);
     processor.reset();
@@ -77,6 +92,7 @@ void MainWindow::initializeTreeView(std::string jsonFilePath) {
     ui->treeView->setModel(nullptr);
     thread->start();
     progressWindow->exec();
+    ui->searchButton->setEnabled(true);
 }
 
 void MainWindow::showTreeView() {
@@ -124,3 +140,14 @@ void MainWindow::handleContextMenu(const QPoint &pos) {
     menu.exec(ui->treeView->viewport()->mapToGlobal(pos));
 }
 
+JsonModel* MainWindow::getJsonModel() const {
+    if (processor == nullptr)
+        return nullptr;
+    return processor->getModel();
+}
+
+void MainWindow::highlightIndex(QModelIndex index) {
+    ui->treeView->scrollTo(index, QAbstractItemView::PositionAtCenter);
+    ui->treeView->selectionModel()->select(index, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+
+}

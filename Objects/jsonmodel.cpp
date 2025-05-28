@@ -104,6 +104,14 @@ QVariant JsonModel::data(const QModelIndex &index, int role) const {
     }
 }
 
+bool JsonModel::isRealData(const QModelIndex &index) const {
+    const Components *item = static_cast<const Components*>(index.internalPointer());
+    if (item->columnCount() == 0)
+        return true;
+    return item->isValuePresent();
+}
+
+
 int JsonModel::rowCount(const QModelIndex &parent) const {
     // Only column 0 has children
     if (parent.column() > 0)

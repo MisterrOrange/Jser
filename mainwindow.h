@@ -18,10 +18,12 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    JsonModel *getJsonModel() const;
 
 private:
     Ui::MainWindow *ui;
     std::unique_ptr<JsonProcessor> processor;
+    void closeEvent(QCloseEvent *e) override;
     void resizeEvent(QResizeEvent *event) override;
     void initializeTreeView(std::string jsonFilePath);
     void openSettings();
@@ -30,5 +32,6 @@ public slots:
     void openFile();
     void showTreeView();
     void handleContextMenu(const QPoint &pos);
+    void highlightIndex(QModelIndex index);
 };
 #endif // MAINWINDOW_H

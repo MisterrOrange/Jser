@@ -39,6 +39,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         processwindow.h processwindow.cpp processwindow.ui
         settingswindow.h settingswindow.cpp settingswindow.ui
         Objects/settings.h Objects/settings.cpp
+        searchresultwindow.h searchresultwindow.cpp searchresultwindow.ui
 
 
     )
