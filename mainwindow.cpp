@@ -93,6 +93,10 @@ void MainWindow::initializeTreeView(std::string jsonFilePath) {
     thread->start();
     progressWindow->exec();
     ui->searchButton->setEnabled(true);
+    // Resize treeview
+    int halfWidth = ui->treeView->viewport()->width() / 2;
+    ui->treeView->header()->resizeSection(0, halfWidth);
+    ui->treeView->header()->resizeSection(1, halfWidth);
 }
 
 void MainWindow::showTreeView() {

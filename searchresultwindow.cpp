@@ -3,6 +3,9 @@
 #include "mainwindow.h"
 #include <QMessageBox>
 #include <QSettings>
+#include <QFuture>
+#include <QtConcurrent/QtConcurrent>
+
 
 SearchResultWindow::SearchResultWindow(MainWindow *main, QWidget *parent)
     : QDialog(parent)
@@ -12,7 +15,7 @@ SearchResultWindow::SearchResultWindow(MainWindow *main, QWidget *parent)
     this->setAttribute(Qt::WA_DeleteOnClose);
     ui->setupUi(this);
     m_mainWindow = main;
-    QObject::connect(ui->searchButton, &QPushButton::clicked, this, &SearchResultWindow::initiateSearch);
+    QObject::connect(ui->searchButton, &QPushButton::clicked, this, &SearchResultWindow::search);
 
     QSettings settings;
     ui->matchKeysBox->setCheckState(settings.value("matchKeys", true).toBool() ? Qt::Checked : Qt::Unchecked);
@@ -40,8 +43,6 @@ void SearchResultWindow::initiateSearch() {
     ui->previousButton->setEnabled(false);
     ui->nextButton->setEnabled(false);
 
-    if (!search())
-        return;
 
     if (m_results.length() == 0) {
         ui->resultLabel->setText("0 results found");
@@ -110,25 +111,54 @@ bool SearchResultWindow::search() {
     if (allowRegex) flags |= Qt::MatchRegularExpression;
     if (allowWildcards) flags |= Qt::MatchWildcard;
 
-    QModelIndexList results;
+
+
+    m_searchProgress = matchKeys + matchValues;
+    m_results.clear();
+
+    m_infoBox = new QMessageBox(this);
+    m_infoBox->setText("Searching...");
+    m_infoBox->setStandardButtons(QMessageBox::NoButton);
+    m_infoBox->show();
+
+
+    if (m_searchProgress == 0)
+        return true;
+
+    std::function<void(int)> searchColumn = [this, model, searchTerm, flags](int column) {
+        saveSearch(model->match(model->index(0, column), 0, searchTerm, -1, flags), column);
+    };
+
     if (matchKeys) {
-        QModelIndex column0Index = model->index(0, 0);
-        results = model->match(column0Index, 0, searchTerm, -1, flags);
+        (void)QtConcurrent::run(searchColumn, 0);
     }
     if (matchValues) {
-        QModelIndex column1Index = model->index(0, 1);
-        QModelIndexList results2 = model->match(column1Index, 0, searchTerm, -1, flags);
-        // Strip "fake" data from column 1
-        for (const QModelIndex &index : std::as_const(results2)) {
-            if (model->isRealData(index))
-                results.append(index);
-        }
+        (void)QtConcurrent::run(searchColumn, 1);
     }
 
-    m_results = results;
     m_index = 0;
     return true;
 }
+
+void SearchResultWindow::saveSearch(QModelIndexList result, int column) {
+    JsonModel *model = m_mainWindow->getJsonModel();
+    for (const QModelIndex &index : std::as_const(result)) {
+        if (column == 0) {
+            m_results.append(index);
+        }
+        if (model->isRealData(index))
+            m_results.append(index);
+    }
+
+    m_searchProgress--;
+    if (m_searchProgress == 0) {
+        emit searchFinished();
+        m_infoBox->deleteLater();
+        initiateSearch();
+    }
+    return;
+}
+
 
 void SearchResultWindow::closeEvent(QCloseEvent *e) {
     // Get options

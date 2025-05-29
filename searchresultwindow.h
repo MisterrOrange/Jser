@@ -4,6 +4,7 @@
 #include "mainwindow.h"
 #include <QDialog>
 #include <QModelIndex>
+#include <QMessageBox>
 
 namespace Ui {
 class SearchResultWindow;
@@ -23,11 +24,17 @@ private:
     MainWindow *m_mainWindow;
     // Returns true on success
     bool search();
+    void saveSearch(QModelIndexList result, int column);
+    int m_searchProgress;
     QModelIndexList m_results;
+    QMessageBox *m_infoBox;
     int m_index;
 
 public slots:
     void initiateSearch();
+
+signals:
+    void searchFinished();
 };
 
 #endif // SEARCHRESULTWINDOW_H
