@@ -25,6 +25,7 @@ void JsonProcessor::ParseJson(int startIndex) {
 
     std::stack<Status> state;
     std::string key;
+    Components::ValueTypes keyType;
     std::string currentString;
     int arrayIndex = 0;
     // Stores whether next item is value or not
@@ -95,12 +96,13 @@ void JsonProcessor::ParseJson(int startIndex) {
                     state.pop();
                     if (state.top() == kInDictionary) {
                         if (valueIncoming) {
-                            std::shared_ptr<Components> child = std::make_shared<Components>(Components::kNone, currentComponent, key, valueType);
+                            std::shared_ptr<Components> child = std::make_shared<Components>(Components::kNone, currentComponent, key, keyType);
                             child->setValue(valueType, currentString);
                             currentComponent->addChild(child);
                         }
                         else {
                             key = currentString;
+                            keyType = valueType;
                         }
 
                         valueIncoming = !valueIncoming;
@@ -147,6 +149,7 @@ void JsonProcessor::ParseJson(int startIndex) {
                 }
                 else {
                     key = "false";
+                    keyType = Components::kBoolean;
                     valueIncoming = true;
                 }
             }
@@ -176,6 +179,7 @@ void JsonProcessor::ParseJson(int startIndex) {
                 }
                 else {
                     key = "true";
+                    keyType = Components::kBoolean;
                     valueIncoming = true;
                 }
             }
@@ -303,6 +307,7 @@ void JsonProcessor::ParseJson(int startIndex) {
                     currentComponent->addChild(child);
                 }
                 key = currentString;
+                keyType = Components::kString;
                 currentString = "";
             }
             else {
