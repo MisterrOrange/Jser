@@ -11,6 +11,7 @@ SearchResultWindow::SearchResultWindow(MainWindow *main, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::SearchResultWindow)
 {
+    this->setWindowTitle("Search");
     this->setWindowFlags(Qt::Dialog | Qt::WindowStaysOnTopHint);
     this->setAttribute(Qt::WA_DeleteOnClose);
     ui->setupUi(this);

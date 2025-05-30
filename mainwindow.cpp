@@ -24,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    this->setWindowTitle("Jser");
     ui->treeView->setHeaderHidden(true);
 
     QObject::connect(ui->actionOpen_File, SIGNAL(triggered()), this, SLOT(openFile()));
