@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
+#include <qmimedata.h>
 #include <qpushbutton.h>
 #include <QFileSystemModel>
 #include <QAbstractItemModelTester>
@@ -153,5 +154,23 @@ JsonModel* MainWindow::getJsonModel() const {
 void MainWindow::highlightIndex(QModelIndex index) {
     ui->treeView->scrollTo(index, QAbstractItemView::PositionAtCenter);
     ui->treeView->selectionModel()->select(index, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+}
 
+void MainWindow::dragEnterEvent(QDragEnterEvent* event) {
+    const QMimeData *data = event->mimeData();
+    QList<QUrl> paths = data->urls();
+
+    if (data->hasUrls() && paths.length() == 1) {
+        std::string path = paths[0].toLocalFile().toStdString();
+        size_t extensionPosition = path.find_last_of(".");
+        std::string extension = path.substr(extensionPosition + 1);
+
+        if (extension == "json" || extension == "txt")
+            event->acceptProposedAction();
+    }
+}
+
+void MainWindow::dropEvent(QDropEvent *event) {
+    QUrl path = event->mimeData()->urls()[0];
+    initializeTreeView(path.toLocalFile().toStdString());
 }

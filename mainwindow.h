@@ -28,6 +28,9 @@ private:
     void initializeTreeView(std::string jsonFilePath);
     void openSettings();
 
+    void dragEnterEvent(QDragEnterEvent* event) override;
+    void dropEvent(QDropEvent *event) override;
+
 public slots:
     void openFile();
     void showTreeView();
