@@ -22,17 +22,28 @@ SearchResultWindow::SearchResultWindow(MainWindow *main, QWidget *parent)
     ui->matchKeysBox->setCheckState(settings.value("matchKeys", true).toBool() ? Qt::Checked : Qt::Unchecked);
     ui->matchValuesBox->setCheckState(settings.value("matchValues", true).toBool() ? Qt::Checked : Qt::Unchecked);
     ui->caseSensitiveBox->setCheckState(settings.value("caseSensitive", false).toBool() ? Qt::Checked : Qt::Unchecked);
-    ui->exactMatchBox->setCheckState(settings.value("exactMatch", false).toBool() ? Qt::Checked : Qt::Unchecked);
+    ui->exactMatchRadio->setChecked(settings.value("exactMatch", false).toBool());
 
     int matchOption = settings.value("matchOption", 0).toInt();
     ui->matchContainsRadio->setChecked(matchOption == 0);
     ui->matchStartsRadio->setChecked(matchOption == 1);
     ui->matchEndsRadio->setChecked(matchOption == 2);
 
-    ui->regexBox->setCheckState(settings.value("allowRegex", false).toBool() ? Qt::Checked : Qt::Unchecked);
-    ui->wildcardsBox->setCheckState(settings.value("allowWildcards", false).toBool() ? Qt::Checked : Qt::Unchecked);
+    ui->regexRadio->setChecked(settings.value("allowRegex", false).toBool());
+    ui->wildcardRadio->setChecked(settings.value("allowWildcards", false).toBool());
 
     this->restoreGeometry(settings.value("searchResultWindowGeometry").toByteArray());
+
+
+    // Connect exactMatch, wildcard, regex radios
+    QObject::connect(ui->exactMatchRadio, &QRadioButton::toggled, this, &SearchResultWindow::handleRadioButton);
+    QObject::connect(ui->wildcardRadio, &QRadioButton::toggled, this, &SearchResultWindow::handleRadioButton);
+    QObject::connect(ui->regexRadio, &QRadioButton::toggled, this, &SearchResultWindow::handleRadioButton);
+
+    if (matchOption == 3)
+        handleRadioButton(true);
+    else
+        handleRadioButton(false);
 }
 
 SearchResultWindow::~SearchResultWindow()
@@ -96,19 +107,20 @@ bool SearchResultWindow::search() {
         box.exec();
         return false;
     }
+
     // Get options
     bool matchKeys = ui->matchKeysBox->checkState();
     bool matchValues = ui->matchValuesBox->checkState();
     bool caseSensitive = ui->caseSensitiveBox->checkState();
-    bool exactMatch = ui->exactMatchBox->checkState();
-    int matchOption = ui->matchContainsRadio->isChecked() ? 0 : ui->matchStartsRadio ? 1 : 2;
-    bool allowRegex = ui->regexBox->checkState();
-    bool allowWildcards = ui->wildcardsBox->checkState();
+    bool exactMatch = ui->exactMatchRadio->isChecked();
+    int matchOption = ui->matchContainsRadio->isChecked() ? 0 : ui->matchStartsRadio->isChecked() ? 1 : ui->matchEndsRadio->isChecked() ? 2 : 3;
+    bool allowRegex = ui->regexRadio->isChecked();
+    bool allowWildcards = ui->wildcardRadio->isChecked();
 
-    Qt::MatchFlags flags = Qt::MatchRecursive | Qt::MatchContains;
+    Qt::MatchFlags flags = Qt::MatchRecursive;
     if (caseSensitive) flags |= Qt::MatchCaseSensitive;
     if (exactMatch) flags |= Qt::MatchExactly;
-    flags |= matchOption == 0 ? Qt::MatchContains : matchOption == 1 ? Qt::MatchStartsWith : Qt::MatchEndsWith;
+    if (matchOption != 3) flags |= matchOption == 0 ? Qt::MatchContains : matchOption == 1 ? Qt::MatchStartsWith : Qt::MatchEndsWith;
     if (allowRegex) flags |= Qt::MatchRegularExpression;
     if (allowWildcards) flags |= Qt::MatchWildcard;
 
@@ -166,10 +178,10 @@ void SearchResultWindow::closeEvent(QCloseEvent *e) {
     bool matchKeys = ui->matchKeysBox->checkState();
     bool matchValues = ui->matchValuesBox->checkState();
     bool caseSensitive = ui->caseSensitiveBox->checkState();
-    bool exactMatch = ui->exactMatchBox->checkState();
-    int matchOption = ui->matchContainsRadio->isChecked() ? 0 : ui->matchStartsRadio ? 1 : 2;
-    bool allowRegex = ui->regexBox->checkState();
-    bool allowWildcards = ui->wildcardsBox->checkState();
+    bool exactMatch = ui->exactMatchRadio->isChecked();
+    int matchOption = ui->matchContainsRadio->isChecked() ? 0 : ui->matchStartsRadio->isChecked() ? 1 : ui->matchEndsRadio->isChecked() ? 2 : 3;
+    bool allowRegex = ui->regexRadio->isChecked();
+    bool allowWildcards = ui->wildcardRadio->isChecked();
 
     // Save settings
     QSettings settings;
@@ -183,4 +195,16 @@ void SearchResultWindow::closeEvent(QCloseEvent *e) {
 
     settings.setValue("searchResultWindowGeometry", saveGeometry());
     QWidget::closeEvent(e);
+}
+
+void SearchResultWindow::handleRadioButton(bool checked) {
+    if (checked) {
+        // Turn off box
+        ui->caseSensitiveBox->setEnabled(false);
+        ui->caseSensitiveBox->setCheckState(Qt::Unchecked);
+    }
+    else {
+        // Turn on
+        ui->caseSensitiveBox->setEnabled(true);
+    }
 }

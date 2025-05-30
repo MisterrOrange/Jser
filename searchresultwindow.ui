@@ -6,32 +6,95 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>332</width>
-    <height>234</height>
+    <width>311</width>
+    <height>238</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="3" column="1">
-    <widget class="QCheckBox" name="matchValuesBox">
+   <item row="0" column="0">
+    <widget class="QLabel" name="label">
+     <property name="font">
+      <font>
+       <pointsize>11</pointsize>
+       <bold>true</bold>
+      </font>
+     </property>
      <property name="text">
-      <string>Match values</string>
+      <string>Options:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="2">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QRadioButton" name="matchContainsRadio">
+       <property name="text">
+        <string>Word contains</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="matchStartsRadio">
+       <property name="text">
+        <string>Word start</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="matchEndsRadio">
+       <property name="text">
+        <string>Word end</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="2" column="0" colspan="2">
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QRadioButton" name="exactMatchRadio">
+       <property name="text">
+        <string>Exact Match</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="wildcardRadio">
+       <property name="text">
+        <string>Allow Wildcards</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="regexRadio">
+       <property name="text">
+        <string>Use Regex</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="3" column="0">
+    <widget class="QCheckBox" name="caseSensitiveBox">
+     <property name="text">
+      <string>Case sensitive</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QCheckBox" name="matchKeysBox">
+     <property name="text">
+      <string>Match keys</string>
      </property>
     </widget>
    </item>
    <item row="4" column="1">
-    <widget class="QCheckBox" name="wildcardsBox">
+    <widget class="QCheckBox" name="matchValuesBox">
      <property name="text">
-      <string>Allow wildcards</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QCheckBox" name="caseSensitiveBox">
-     <property name="text">
-      <string>Case sensitive</string>
+      <string>Match values</string>
      </property>
     </widget>
    </item>
@@ -48,50 +111,6 @@
       </widget>
      </item>
     </layout>
-   </item>
-   <item row="1" column="1">
-    <widget class="QCheckBox" name="exactMatchBox">
-     <property name="text">
-      <string>Exact match</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0">
-    <widget class="QCheckBox" name="matchKeysBox">
-     <property name="text">
-      <string>Match keys</string>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="0" colspan="2">
-    <widget class="QLabel" name="resultLabel">
-     <property name="text">
-      <string/>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignmentFlag::AlignCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="0">
-    <widget class="QLabel" name="label">
-     <property name="font">
-      <font>
-       <pointsize>11</pointsize>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="text">
-      <string>Options:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="0">
-    <widget class="QCheckBox" name="regexBox">
-     <property name="text">
-      <string>Use Regex</string>
-     </property>
-    </widget>
    </item>
    <item row="7" column="0">
     <widget class="QPushButton" name="previousButton">
@@ -113,30 +132,15 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="0" colspan="2">
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
-      <widget class="QRadioButton" name="matchContainsRadio">
-       <property name="text">
-        <string>Match contains</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QRadioButton" name="matchStartsRadio">
-       <property name="text">
-        <string>Match starts</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QRadioButton" name="matchEndsRadio">
-       <property name="text">
-        <string>Match ends</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+   <item row="6" column="0" colspan="2">
+    <widget class="QLabel" name="resultLabel">
+     <property name="text">
+      <string/>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignmentFlag::AlignCenter</set>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

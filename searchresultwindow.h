@@ -32,6 +32,7 @@ private:
 
 public slots:
     void initiateSearch();
+    void handleRadioButton(bool checked);
 
 signals:
     void searchFinished();
