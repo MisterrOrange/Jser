@@ -47,6 +47,7 @@ void JsonProcessor::ParseJson(int startIndex) {
             // To not check too often
             if (QThread::currentThread()->isInterruptionRequested()) {
                 m_model.reset();
+                m_errorMessage = "Parsing aborted";
                 return;
             }
         }

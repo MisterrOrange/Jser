@@ -93,12 +93,7 @@ void MainWindow::initializeTreeView(std::string jsonFilePath) {
 
     ui->treeView->setModel(nullptr);
     thread->start();
-    progressWindow->exec();
-    ui->searchButton->setEnabled(true);
-    // Resize treeview
-    int halfWidth = ui->treeView->viewport()->width() / 2;
-    ui->treeView->header()->resizeSection(0, halfWidth);
-    ui->treeView->header()->resizeSection(1, halfWidth);
+    progressWindow->exec();    
 }
 
 void MainWindow::showTreeView() {
@@ -106,6 +101,12 @@ void MainWindow::showTreeView() {
         ui->treeView->setModel(processor->getModel());
         ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
         QObject::connect(ui->treeView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(handleContextMenu(QPoint)));
+        ui->searchButton->setEnabled(true);
+
+        // Resize treeview
+        int halfWidth = ui->treeView->viewport()->width() / 2;
+        ui->treeView->header()->resizeSection(0, halfWidth);
+        ui->treeView->header()->resizeSection(1, halfWidth);
         return;
     }
     QMessageBox errorBox(this);
