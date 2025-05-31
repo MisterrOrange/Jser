@@ -8,33 +8,33 @@ Components::Components(StorageTypes type) {
     m_isValuePresent = false;
 }
 
-Components::Components(StorageTypes type, std::shared_ptr<Components> parent, std::string name, ValueTypes nameType) {
+Components::Components(StorageTypes type, std::shared_ptr<Components> parent, std::wstring name, ValueTypes nameType) {
     m_generalType = type;
     m_nameType = nameType;
     m_parent = parent; // Pointing parent to child inside here doesn't work (for some reason), so it has to be done outside
 
-    m_name = QVariant(QString::fromStdString(name));;
+    m_name = QVariant(QString::fromStdWString(name));;
     m_isValuePresent = false;
 }
 
 
 Components::Components(StorageTypes type, std::shared_ptr<Components> parent, int index)
-    : Components(type, parent, "[" + std::to_string(index) + "]") {
+    : Components(type, parent, L"[" + std::to_wstring(index) + L"]") {
     m_nameType = kArrayIndex;
 }
 
 Components::Components(StorageTypes type, std::shared_ptr<Components> parent, bool value)
-    : Components(type, parent, value ? std::string("true"): std::string("false")) {
+    : Components(type, parent, value ? std::wstring(L"true"): std::wstring(L"false")) {
     m_nameType = kBoolean;
 }
 
 
-void Components::setValue(ValueTypes valueType, std::string value) {
+void Components::setValue(ValueTypes valueType, std::wstring value) {
     if (m_children.size() != 0)
         throw std::invalid_argument("Value can't be assigned if children are present");
 
     m_valueType = valueType;
-    m_value = QVariant(QString::fromStdString(value));
+    m_value = QVariant(QString::fromStdWString(value));
     m_isValuePresent = true;
 }
 

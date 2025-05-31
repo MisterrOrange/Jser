@@ -24,10 +24,10 @@ public:
     };
 
     Components(StorageTypes type);
-    explicit Components(StorageTypes type, std::shared_ptr<Components> parent, std::string name, ValueTypes nameType = kString);
+    explicit Components(StorageTypes type, std::shared_ptr<Components> parent, std::wstring name, ValueTypes nameType = kString);
     explicit Components(StorageTypes type, std::shared_ptr<Components> parent, int index);
     explicit Components(StorageTypes type, std::shared_ptr<Components> parent, bool value);
-    void setValue(ValueTypes valueType, std::string value);
+    void setValue(ValueTypes valueType, std::wstring value);
 
     void addChild(std::shared_ptr<Components> child); // Adds a child to `this`
     std::shared_ptr<Components> child(int row) const;

@@ -24,9 +24,9 @@ void JsonProcessor::ParseJson(int startIndex) {
     }
 
     std::stack<Status> state;
-    std::string key;
+    std::wstring key;
     Components::ValueTypes keyType;
-    std::string currentString;
+    std::wstring currentString;
     int arrayIndex = 0;
     // Stores whether next item is value or not
     bool valueIncoming = false;
@@ -66,6 +66,13 @@ void JsonProcessor::ParseJson(int startIndex) {
                     case 'r': currentString += '\r'; break;
                     case 'b': currentString += '\b'; break;
                     case 'f': currentString += '\f'; break;
+                    case '/': currentString += '/'; break; // idk who even escapes '/'
+                    case 'u': {
+                        std::string hexNumber = std::string(1, getCharacter(it+2)) + getCharacter(it+3)+ getCharacter(it+4)+ getCharacter(it+5);
+                        uint decimalNumber = std::stoul(hexNumber, nullptr, 16);
+                        currentString += static_cast<wchar_t>(decimalNumber);
+                        break;
+                    }
                     default:
                         logError("Unknown escape character", it, 0, 1);
                         return;
@@ -78,7 +85,7 @@ void JsonProcessor::ParseJson(int startIndex) {
             }
             else if (state.top() == kInNumber || state.top() == kInFloat) {
                 // Still in number (or float)
-                if (std::isdigit(character)) {
+                if (std::isdigit(character) || character == '-') {
                     // Capture number
                     currentString += character;
                     continue;
@@ -89,6 +96,10 @@ void JsonProcessor::ParseJson(int startIndex) {
                     state.pop();
                     state.push(kInFloat);
                     currentString += '.';
+                    continue;
+                }
+                else if (character == 'e' || character == 'E') {
+                    currentString += 'e';
                     continue;
                 }
                 else {
@@ -113,12 +124,12 @@ void JsonProcessor::ParseJson(int startIndex) {
                         child->setValue(valueType, currentString);
                         currentComponent->addChild(child);
                     }
-                    currentString = "";
+                    currentString = L"";
                 }
             }
         }
 
-        if (std::isdigit(character)) {
+        if (std::isdigit(character) || character == '-') {
             state.push(kInNumber);
             currentString += character;
             continue;
@@ -144,11 +155,11 @@ void JsonProcessor::ParseJson(int startIndex) {
                         logError("Invalid state", it, 10, 2);
                         return;
                     }
-                    child->setValue(Components::kBoolean, "false");
+                    child->setValue(Components::kBoolean, L"false");
                     currentComponent->addChild(child);
                 }
                 else {
-                    key = "false";
+                    key = L"false";
                     keyType = Components::kBoolean;
                     valueIncoming = true;
                 }
@@ -174,11 +185,11 @@ void JsonProcessor::ParseJson(int startIndex) {
                         logError("Invalid state", it, 10, 2);
                         return;
                     }
-                    child->setValue(Components::kBoolean, "true");
+                    child->setValue(Components::kBoolean, L"true");
                     currentComponent->addChild(child);
                 }
                 else {
-                    key = "true";
+                    key = L"true";
                     keyType = Components::kBoolean;
                     valueIncoming = true;
                 }
@@ -207,7 +218,7 @@ void JsonProcessor::ParseJson(int startIndex) {
                     logError("Invalid state", it, 20, 5);
                     return;
                 }
-                child->setValue(Components::kNull, "null");
+                child->setValue(Components::kNull, L"null");
                 currentComponent->addChild(child);
             }
             break;
@@ -308,7 +319,7 @@ void JsonProcessor::ParseJson(int startIndex) {
                 }
                 key = currentString;
                 keyType = Components::kString;
-                currentString = "";
+                currentString = L"";
             }
             else {
                 state.push(kInString);
