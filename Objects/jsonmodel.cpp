@@ -35,8 +35,8 @@ QVariant JsonModel::data(const QModelIndex &index, int role) const {
         }
         if (!settings.value("showStorageName", true).toBool())
             return {};
-        // Return type of storage for column 1
-        return item->convertStorageTypeToString(item->getGeneralType());
+        // Return type of storage for column 1 + their child count
+        return QString::fromStdString(item->convertStorageTypeToString(item->getGeneralType()).toStdString() + " (" + std::to_string(item->childCount()) + ")");
     }
     // What's being displayed as tooltips
     case Qt::ToolTipRole: {
