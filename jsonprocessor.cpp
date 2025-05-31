@@ -85,7 +85,7 @@ void JsonProcessor::ParseJson(int startIndex) {
             }
             else if (state.top() == kInNumber || state.top() == kInFloat) {
                 // Still in number (or float)
-                if (std::isdigit(character) || character == '-') {
+                if (std::isdigit(character) || character == '-' || character == '+') {
                     // Capture number
                     currentString += character;
                     continue;
@@ -129,7 +129,7 @@ void JsonProcessor::ParseJson(int startIndex) {
             }
         }
 
-        if (std::isdigit(character) || character == '-') {
+        if (std::isdigit(character) || character == '-' || character == '+') {
             state.push(kInNumber);
             currentString += character;
             continue;
