@@ -1,12 +1,12 @@
 # Jser
 ## Infos
-Jser is a json parser written c++ with a minimalistic UI and yeah, it parses json. It also features a search menu and settings to adjust your colour prefrences. (Dark/Light mode is controlled by your system settings)
+Jser is a fast & memory efficient json parser written c++ with a minimalistic UI. It features a search menu and settings to adjust your colour prefrences. (Dark/Light mode is controlled by your system settings)
 
 ## Download
-Just download either the static or dynamic version over at the Releases tab. (Note that the static version is a bit slower than the dynamic one)
+Just download either the static or dynamic version over at the releases tab. (Note that the static version is a bit slower than the dynamic one)
 
 ## Currently supported types:
-**TLDR: It supports everything the whole of the [Json](https://www.json.org/json-en.html) standart and even more** (Don't ask me how booleans as keys make sense)
+**TLDR: It supports the entire [Json standard](https://www.json.org/json-en.html) and even more** (Don't ask me how booleans as keys make sense)
 - Arrays
   - arrays
   - dictionaries
@@ -30,4 +30,12 @@ Just download either the static or dynamic version over at the Releases tab. (No
 - [Qt](https://qt.io) as the framework
 
 ## Screenshots
-(Coming soon)
+
+### Main menu
+<img src="./images/main-menu.png" alt="drawing" width="550"/>
+
+### Search Dialog
+<img src="./images/search-dialog.png" alt="drawing" width="300"/>
+
+### Settings
+<img src="./images/settings.png" alt="drawing" width="300"/>
