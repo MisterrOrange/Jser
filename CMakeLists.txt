@@ -9,7 +9,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_SOURCE_DIR}")
+set(CMAKE_AUTOUIC_SEARCH_PATHS "${CMAKE_SOURCE_DIR}/src" "${CMAKE_SOURCE_DIR}/src/Objects")
 
 if (MSVC)
     add_compile_options(/Zc:__cplusplus)
@@ -21,25 +21,23 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets Test)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 set(PROJECT_SOURCES
-        main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
+        src/main.cpp
+        src/mainwindow.cpp
+        src/mainwindow.h
+        src/mainwindow.ui
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(Jser
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        Objects/components.cpp Objects/components.h
-
-
-        jsonprocessor.h jsonprocessor.cpp
-        Objects/jsonmodel.h Objects/jsonmodel.cpp
-        processwindow.h processwindow.cpp processwindow.ui
-        settingswindow.h settingswindow.cpp settingswindow.ui
-        Objects/settings.h Objects/settings.cpp
-        searchresultwindow.h searchresultwindow.cpp searchresultwindow.ui
+        src/Objects/components.cpp src/Objects/components.h
+        src/jsonprocessor.h src/jsonprocessor.cpp
+        src/Objects/jsonmodel.h src/Objects/jsonmodel.cpp
+        src/processwindow.h src/processwindow.cpp src/processwindow.ui
+        src/settingswindow.h src/settingswindow.cpp src/settingswindow.ui
+        src/Objects/settings.h src/Objects/settings.cpp
+        src/searchresultwindow.h src/searchresultwindow.cpp src/searchresultwindow.ui
 
 
     )
