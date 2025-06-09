@@ -36,5 +36,6 @@ public slots:
     void showTreeView();
     void handleContextMenu(const QPoint &pos);
     void highlightIndex(QModelIndex index);
+    void handlePaste();
 };
 #endif // MAINWINDOW_H

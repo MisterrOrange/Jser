@@ -14,6 +14,10 @@
 #include <QClipboard>
 #include <QGuiApplication>
 #include <QSettings>
+#include <QShortcut>
+#include <QClipboard>
+#include <iostream>
+#include <fstream>
 #include "Objects/components.h"
 #include "processwindow.h"
 #include "settingswindow.h"
@@ -35,6 +39,10 @@ MainWindow::MainWindow(QWidget *parent)
     });
     QSettings settings;
     this->restoreGeometry(settings.value("mainWindowWindowGeometry").toByteArray());
+
+    // Setup Ctrl + v shortcut
+    QShortcut *shortcut = new QShortcut(QKeySequence(QKeySequence::Paste), this);
+    QObject::connect(shortcut, &QShortcut::activated, this, &MainWindow::handlePaste);
 }
 
 MainWindow::~MainWindow()
@@ -97,22 +105,28 @@ void MainWindow::initializeTreeView(std::string jsonFilePath) {
 }
 
 void MainWindow::showTreeView() {
-    if (processor->wasSuccessfullyParsed()) {
-        ui->treeView->setModel(processor->getModel());
-        ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
-        QObject::connect(ui->treeView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(handleContextMenu(QPoint)));
-        ui->searchButton->setEnabled(true);
-
-        // Resize treeview
-        int halfWidth = ui->treeView->viewport()->width() / 2;
-        ui->treeView->header()->resizeSection(0, halfWidth);
-        ui->treeView->header()->resizeSection(1, halfWidth);
+    if (!processor->wasSuccessfullyParsed()) {
+        QMessageBox errorBox(this);
+        errorBox.setText(QString::fromStdString(processor->getErrorMessage()));
+        errorBox.addButton(QMessageBox::StandardButton::Close);
+        errorBox.exec();
         return;
     }
-    QMessageBox errorBox(this);
-    errorBox.setText(QString::fromStdString(processor->getErrorMessage()));
-    errorBox.addButton(QMessageBox::StandardButton::Close);
-    errorBox.exec();
+    ui->treeView->setModel(processor->getModel());
+    ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
+    QObject::connect(ui->treeView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(handleContextMenu(QPoint)));
+    ui->searchButton->setEnabled(true);
+
+    // Resize treeview
+    int halfWidth = ui->treeView->viewport()->width() / 2;
+    ui->treeView->header()->resizeSection(0, halfWidth);
+    ui->treeView->header()->resizeSection(1, halfWidth);
+
+    // Delete temp file if it exists
+    std::filesystem::path file { "~clipboard-content.json" };
+    if (std::filesystem::exists(file)) {
+        std::filesystem::remove("~clipboard-content.json");
+    }
 }
 
 void MainWindow::handleContextMenu(const QPoint &pos) {
@@ -175,4 +189,19 @@ void MainWindow::dragEnterEvent(QDragEnterEvent* event) {
 void MainWindow::dropEvent(QDropEvent *event) {
     QUrl path = event->mimeData()->urls()[0];
     initializeTreeView(path.toLocalFile().toStdString());
+}
+
+void MainWindow::handlePaste() {
+    const QMimeData *data = QApplication::clipboard()->mimeData();
+    if (!data->hasText()) {
+        QMessageBox box(this);
+        box.setText("Clipboard must contain text");
+        box.exec();
+        return;
+    }
+    // Create file with clipboard content
+    std::ofstream file("~clipboard-content.json");
+    file << data->text().toStdString();
+    file.close();
+    initializeTreeView("~clipboard-content.json");
 }
