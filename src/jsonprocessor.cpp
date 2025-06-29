@@ -307,7 +307,7 @@ void JsonProcessor::ParseJson(int startIndex) {
                     // If key and value have been captured
                     if (!valueIncoming) {
                         // Create child to save key-value-pair
-                        std::shared_ptr<Components> child = std::make_shared<Components>(Components::kNone, currentComponent, key);
+                        std::shared_ptr<Components> child = std::make_shared<Components>(Components::kNone, currentComponent, key, keyType);
                         child->setValue(Components::kString, currentString);
                         currentComponent->addChild(child);
                     }
